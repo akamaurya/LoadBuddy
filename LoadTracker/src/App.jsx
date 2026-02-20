@@ -35,7 +35,7 @@ function App() {
       setIsPaused(true);
     }
 
-    // 3. Initialize OneSignal (Only if not showing the prompt, or you can init anyway)
+    // 3. Initialize OneSignal
     const initOneSignal = async () => {
       try {
         await OneSignal.init({
@@ -46,14 +46,16 @@ function App() {
           },
         });
 
-        // Request permission if they are in the PWA or a supporting browser
-        if (!isIos() || isStandalone()) {
-          OneSignal.Slidedown.promptPush();
-        }
-
         // Apply initial tags based on paused state
         const pausedStr = savedPauseState === 'true' ? 'true' : 'false';
         OneSignal.User.addTag("paused", pausedStr);
+
+        // Request permission if they are in the PWA or a supporting browser
+        if (!isIos() || isStandalone()) {
+          // On iOS PWA, we usually need a user interaction to trigger the native prompt
+          // if it hasn't been granted yet. Slidedown prompt helps bridge this.
+          await OneSignal.Slidedown.promptPushCategories({ force: true });
+        }
       } catch (error) {
         console.error("OneSignal Init Error:", error);
       }
@@ -81,9 +83,14 @@ function App() {
         <h1>{isDeload ? 'Deload' : 'Load'}</h1>
       </main>
 
-      <button className="pause-button" onClick={togglePause}>
-        {isPaused ? 'Resume Notifications' : 'Pause Notifications'}
-      </button>
+      <div className="button-group">
+        <button className="action-button" onClick={() => OneSignal.Slidedown.promptPushCategories({ force: true })}>
+          Enable Push
+        </button>
+        <button className="action-button" onClick={togglePause}>
+          {isPaused ? 'Resume' : 'Pause'} Notifications
+        </button>
+      </div>
 
       {showIosPrompt && (
         <div className="ios-prompt">
