@@ -47,12 +47,21 @@ function App() {
           },
         });
 
+        // Ensure the device registers as a distinct User in OneSignal
+        // If we don't do this, anonymous web push sometimes fails to appear in Audience
+        let localUserId = localStorage.getItem('loadtracker_uid');
+        if (!localUserId) {
+          localUserId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2);
+          localStorage.setItem('loadtracker_uid', localUserId);
+        }
+        await OneSignal.login(localUserId);
+
         // Apply initial tags based on paused state
         const pausedStr = savedPauseState === 'true' ? 'true' : 'false';
         OneSignal.User.addTag("paused", pausedStr);
 
         // Check current subscription status
-        const optIn = window.OneSignal?.User?.PushSubscription?.optedIn;
+        const optIn = OneSignal.User.PushSubscription.optedIn;
         setIsSubscribed(!!optIn);
 
         // Listen for changes
