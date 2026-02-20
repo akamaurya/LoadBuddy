@@ -45,6 +45,8 @@ function App() {
           notifyButton: {
             enable: false,
           },
+          serviceWorkerParam: { scope: "/" },
+          serviceWorkerPath: "sw.js",
         });
 
         // Ensure the device registers as a distinct User in OneSignal
