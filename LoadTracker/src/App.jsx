@@ -97,6 +97,9 @@ function App() {
       if (!window.OneSignal) return;
       // First show native permission prompt
       await OneSignal.Notifications.requestPermission();
+      // In V2, explicitly tell the SDK to opt the user's subscription in
+      // This maps the device token to the User we just created
+      await OneSignal.User.PushSubscription.optIn();
     } catch (e) {
       console.error("Push Error", e);
       if (window.OneSignal) {
