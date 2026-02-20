@@ -58,12 +58,15 @@ body,
 /* Button Group (Bottom Center) */
 .button-group {
   position: absolute;
-  bottom: 40px;
+  bottom: calc(40px + env(safe-area-inset-bottom, 0px));
   left: 0;
   width: 100%;
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 15px;
+  padding: 0 20px;
+  z-index: 50;
 }
 
 .action-button {

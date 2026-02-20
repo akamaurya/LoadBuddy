@@ -9,6 +9,7 @@ const ONESIGNAL_APP_ID = import.meta.env.VITE_ONESIGNAL_APP_ID || "YOUR_ONESIGNA
 function App() {
   const [isPaused, setIsPaused] = useState(false);
   const [showIosPrompt, setShowIosPrompt] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(true); // Default to true so it doesn't flash
 
   // Calculate current week and cycle
   const currentWeek = getISOWeek(new Date());
@@ -50,9 +51,15 @@ function App() {
         const pausedStr = savedPauseState === 'true' ? 'true' : 'false';
         OneSignal.User.addTag("paused", pausedStr);
 
-        // We will remove the automatic Slidedown prompt entirely.
-        // On iOS, automatic prompts on load are heavily restricted and often fail silently.
-        // It's much strictly better to rely *only* on the manual button click.
+        // Check current subscription status
+        const optIn = window.OneSignal?.User?.PushSubscription?.optedIn;
+        setIsSubscribed(!!optIn);
+
+        // Listen for changes
+        OneSignal.User.PushSubscription.addEventListener("change", (e) => {
+          setIsSubscribed(e.current.optedIn);
+        });
+
       } catch (error) {
         console.error("OneSignal Init Error:", error);
       }
@@ -68,9 +75,24 @@ function App() {
 
     // Update OneSignal Tag
     try {
-      OneSignal.User.addTag("paused", newState.toString());
+      if (window.OneSignal) {
+        OneSignal.User.addTag("paused", newState.toString());
+      }
     } catch (e) {
       console.error("Failed to update OneSignal tag", e);
+    }
+  };
+
+  const handleEnablePush = async () => {
+    try {
+      if (!window.OneSignal) return;
+      // First show native permission prompt
+      await OneSignal.Notifications.requestPermission();
+    } catch (e) {
+      console.error("Push Error", e);
+      if (window.OneSignal) {
+        OneSignal.Slidedown.promptPushCategories({ force: true });
+      }
     }
   };
 
@@ -81,20 +103,13 @@ function App() {
       </main>
 
       <div className="button-group">
-        <button className="action-button" onClick={async () => {
-          try {
-            // First show native permission prompt
-            await OneSignal.Notifications.requestPermission();
-          } catch (e) {
-            console.error("Push Error", e);
-            // Fallback to slidedown if native fails or is blocked
-            OneSignal.Slidedown.promptPushCategories({ force: true });
-          }
-        }}>
-          Enable Push
-        </button>
+        {!isSubscribed && (
+          <button className="action-button" onClick={handleEnablePush}>
+            Enable Push
+          </button>
+        )}
         <button className="action-button" onClick={togglePause}>
-          {isPaused ? 'Resume' : 'Pause'} Notifications
+          {isPaused ? 'Resume' : 'Pause'} Tasks
         </button>
       </div>
 
