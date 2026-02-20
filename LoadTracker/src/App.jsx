@@ -114,11 +114,12 @@ function App() {
     try {
       const reg = await navigator.serviceWorker.ready;
       if (reg) {
+        const title = isDeload ? "Deload next week" : "Load next week";
         const message = isDeload
           ? "Tomorrow starts your Deload week! Take it easy."
           : "Tomorrow starts your Load week! Time to push.";
 
-        await reg.showNotification("Week Update", {
+        await reg.showNotification(title, {
           body: message,
           icon: "/pwa-192x192.png",
           vibrate: [200, 100, 200]

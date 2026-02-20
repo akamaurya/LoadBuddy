@@ -31,6 +31,8 @@ export default async function handler(req, res) {
             ? "Tomorrow starts your Deload week! Take it easy."
             : "Tomorrow starts your Load week! Time to push.";
 
+        const title = isDeload ? "Deload next week" : "Load next week";
+
         // Call OneSignal API to send Push Notification
         // We use the "paused" tag to exclude users who have paused notifications
         const response = await fetch('https://onesignal.com/api/v1/notifications', {
@@ -42,7 +44,7 @@ export default async function handler(req, res) {
             body: JSON.stringify({
                 app_id: ONESIGNAL_APP_ID,
                 contents: { en: message },
-                headings: { en: "Week Update" },
+                headings: { en: title },
                 // Target users where "paused" tag is strictly not "true"
                 filters: [
                     {
