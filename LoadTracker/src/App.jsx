@@ -50,12 +50,9 @@ function App() {
         const pausedStr = savedPauseState === 'true' ? 'true' : 'false';
         OneSignal.User.addTag("paused", pausedStr);
 
-        // Request permission if they are in the PWA or a supporting browser
-        if (!isIos() || isStandalone()) {
-          // On iOS PWA, we usually need a user interaction to trigger the native prompt
-          // if it hasn't been granted yet. Slidedown prompt helps bridge this.
-          await OneSignal.Slidedown.promptPushCategories({ force: true });
-        }
+        // We will remove the automatic Slidedown prompt entirely.
+        // On iOS, automatic prompts on load are heavily restricted and often fail silently.
+        // It's much strictly better to rely *only* on the manual button click.
       } catch (error) {
         console.error("OneSignal Init Error:", error);
       }
@@ -84,7 +81,16 @@ function App() {
       </main>
 
       <div className="button-group">
-        <button className="action-button" onClick={() => OneSignal.Slidedown.promptPushCategories({ force: true })}>
+        <button className="action-button" onClick={async () => {
+          try {
+            // First show native permission prompt
+            await OneSignal.Notifications.requestPermission();
+          } catch (e) {
+            console.error("Push Error", e);
+            // Fallback to slidedown if native fails or is blocked
+            OneSignal.Slidedown.promptPushCategories({ force: true });
+          }
+        }}>
           Enable Push
         </button>
         <button className="action-button" onClick={togglePause}>
