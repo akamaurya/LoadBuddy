@@ -110,6 +110,28 @@ function App() {
     }
   };
 
+  const handleTestPush = async () => {
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      if (reg) {
+        const message = isDeload
+          ? "Tomorrow starts your Deload week! Take it easy."
+          : "Tomorrow starts your Load week! Time to push.";
+
+        await reg.showNotification("Week Update", {
+          body: message,
+          icon: "/pwa-192x192.png",
+          vibrate: [200, 100, 200]
+        });
+      } else {
+        alert("Service Worker not ready. Are you on iOS Home Screen?");
+      }
+    } catch (error) {
+      console.error("Local Push Error:", error);
+      alert("Error showing test push: " + error.message);
+    }
+  };
+
   return (
     <div className={`app-container ${isDeload ? 'deload' : 'load'}`}>
       <main className="content">
@@ -120,6 +142,11 @@ function App() {
         {!isSubscribed && (
           <button className="action-button" onClick={handleEnablePush}>
             Enable Push
+          </button>
+        )}
+        {isSubscribed && (
+          <button className="action-button" onClick={handleTestPush}>
+            Test Push
           </button>
         )}
         <button className="action-button" onClick={togglePause}>
