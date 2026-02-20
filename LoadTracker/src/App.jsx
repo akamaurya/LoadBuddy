@@ -6,6 +6,8 @@ import './App.css';
 // Use the environment variable from Vercel (must start with VITE_)
 const ONESIGNAL_APP_ID = import.meta.env.VITE_ONESIGNAL_APP_ID || "YOUR_ONESIGNAL_APP_ID";
 
+import { Analytics } from '@vercel/analytics/react';
+
 function App() {
   const [isPaused, setIsPaused] = useState(false);
   const [showIosPrompt, setShowIosPrompt] = useState(false);
@@ -160,6 +162,7 @@ function App() {
           <p>Tap <span className="icon">⬇️ Share</span> and then<br /><strong>Add to Home Screen</strong><br />to install the LoadTracker app & enable notifications.</p>
         </div>
       )}
+      <Analytics />
     </div>
   );
 }
