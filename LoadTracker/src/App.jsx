@@ -8,6 +8,8 @@ const ONESIGNAL_APP_ID = import.meta.env.VITE_ONESIGNAL_APP_ID || "YOUR_ONESIGNA
 
 import { Analytics } from '@vercel/analytics/react';
 
+let isOneSignalInitialized = false;
+
 function App() {
   const [isPaused, setIsPaused] = useState(false);
   const [showIosPrompt, setShowIosPrompt] = useState(false);
@@ -40,6 +42,12 @@ function App() {
 
     // 3. Initialize OneSignal
     const initOneSignal = async () => {
+      if (ONESIGNAL_APP_ID === "YOUR_ONESIGNAL_APP_ID") {
+        console.warn("OneSignal App ID is missing. Skipping initialization.");
+        return;
+      }
+      if (isOneSignalInitialized) return;
+      isOneSignalInitialized = true;
       try {
         await OneSignal.init({
           appId: ONESIGNAL_APP_ID,
