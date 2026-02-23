@@ -11,7 +11,7 @@ export default defineConfig({
       workbox: {
         importScripts: ['/OneSignalSDKWorker.js'],
       },
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'mask-icon.svg'],
       manifest: {
         name: 'LoadTracker',
         short_name: 'LoadTracker',
