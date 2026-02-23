@@ -13,8 +13,8 @@ export default defineConfig({
       },
       includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'mask-icon.svg'],
       manifest: {
-        name: 'LoadTracker',
-        short_name: 'LoadTracker',
+        name: 'LoadBuddy',
+        short_name: 'LoadBuddy',
         description: 'Track your 4-week load/deload training cycle',
         theme_color: '#2ECC71',
         background_color: '#2ECC71',
