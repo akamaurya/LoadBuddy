@@ -43,16 +43,14 @@ export default async function handler(req, res) {
             },
             body: JSON.stringify({
                 app_id: ONESIGNAL_APP_ID,
+                target_channel: "push",
                 contents: { en: message },
                 headings: { en: title },
-                // Target users where "paused" tag is strictly not "true"
+                // Target users who are not explicitly paused
                 filters: [
-                    {
-                        field: "tag",
-                        key: "paused",
-                        relation: "!=",
-                        value: "true"
-                    }
+                    { field: "tag", key: "paused", relation: "=", value: "false" },
+                    { operator: "OR" },
+                    { field: "tag", key: "paused", relation: "not_exists" }
                 ]
             })
         });
