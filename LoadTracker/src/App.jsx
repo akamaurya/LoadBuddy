@@ -1,23 +1,67 @@
 import { useState, useEffect } from 'react';
-import { getISOWeek } from 'date-fns';
+import { differenceInDays, parseISO } from 'date-fns';
 import OneSignal from 'react-onesignal';
+import { Auth } from '@supabase/auth-ui-react';
+import { ThemeSupa } from '@supabase/auth-ui-shared';
+import { supabase } from './lib/supabase';
+import { Settings } from './components/Settings';
 import './App.css';
-
-// Use the environment variable from Vercel (must start with VITE_)
-const ONESIGNAL_APP_ID = import.meta.env.VITE_ONESIGNAL_APP_ID || "YOUR_ONESIGNAL_APP_ID";
-
 import { Analytics } from '@vercel/analytics/react';
 
+const ONESIGNAL_APP_ID = import.meta.env.VITE_ONESIGNAL_APP_ID || "YOUR_ONESIGNAL_APP_ID";
 let isOneSignalInitialized = false;
 
 function App() {
+  const [session, setSession] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [showSettings, setShowSettings] = useState(false);
+
   const [isPaused, setIsPaused] = useState(false);
   const [showIosPrompt, setShowIosPrompt] = useState(false);
-  const [isSubscribed, setIsSubscribed] = useState(true); // Default to true so it doesn't flash
+  const [isSubscribed, setIsSubscribed] = useState(true);
 
-  // Calculate current week and cycle
-  const currentWeek = getISOWeek(new Date());
-  const isDeload = currentWeek % 4 === 0;
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    async function getProfile() {
+      if (!session) {
+        setProfile(null);
+        setIsLoadingProfile(false);
+        return;
+      }
+
+      setIsLoadingProfile(true);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+
+      if (data) {
+        setProfile(data);
+      } else if (error && error.code !== 'PGRST116') { // PGRST116 is No Rows Found
+        console.error("Error fetching profile", error);
+        setShowSettings(true);
+      } else {
+        setShowSettings(true); // Force settings if no profile
+      }
+      setIsLoadingProfile(false);
+    }
+    getProfile();
+  }, [session]);
+
+  const localUserId = session?.user?.id;
 
   useEffect(() => {
     // 1. Check for iOS and if it's already installed (standalone mode)
@@ -46,7 +90,7 @@ function App() {
         console.warn("OneSignal App ID is missing. Skipping initialization.");
         return;
       }
-      if (isOneSignalInitialized) return;
+      if (isOneSignalInitialized || !localUserId) return;
       isOneSignalInitialized = true;
       try {
         await OneSignal.init({
@@ -59,13 +103,7 @@ function App() {
           serviceWorkerPath: "sw.js",
         });
 
-        // Ensure the device registers as a distinct User in OneSignal
-        // If we don't do this, anonymous web push sometimes fails to appear in Audience
-        let localUserId = localStorage.getItem('loadtracker_uid');
-        if (!localUserId) {
-          localUserId = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2);
-          localStorage.setItem('loadtracker_uid', localUserId);
-        }
+        // Use Supabase User ID for OneSignal external id
         await OneSignal.login(localUserId);
 
         // Apply initial tags based on paused state
@@ -87,14 +125,13 @@ function App() {
     };
 
     initOneSignal();
-  }, []);
+  }, [localUserId]);
 
   const togglePause = () => {
     const newState = !isPaused;
     setIsPaused(newState);
     localStorage.setItem('loadtracker_paused', newState.toString());
 
-    // Update OneSignal Tag
     try {
       if (window.OneSignal) {
         OneSignal.User.addTag("paused", newState.toString());
@@ -107,10 +144,7 @@ function App() {
   const handleEnablePush = async () => {
     try {
       if (!window.OneSignal) return;
-      // First show native permission prompt
       await OneSignal.Notifications.requestPermission();
-      // In V2, explicitly tell the SDK to opt the user's subscription in
-      // This maps the device token to the User we just created
       await OneSignal.User.PushSubscription.optIn();
     } catch (e) {
       console.error("Push Error", e);
@@ -143,27 +177,99 @@ function App() {
     }
   };
 
+  if (!session) {
+    return (
+      <div className="auth-container" style={{ padding: '2rem', maxWidth: '400px', margin: '0 auto', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>LoadTracker</h1>
+        <div className="auth-wrapper" style={{ background: 'rgba(255,255,255,0.05)', padding: '2rem', borderRadius: '12px' }}>
+          <Auth
+            supabaseClient={supabase}
+            appearance={{
+              theme: ThemeSupa,
+              style: {
+                button: { background: 'white', color: 'black' },
+                input: { color: 'white' }
+              }
+            }}
+            providers={[]}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoadingProfile) {
+    return <div className="loading" style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading profile...</div>;
+  }
+
+  // Calculate current week and cycle based on profile
+  let isDeload = false;
+
+  if (profile) {
+    // Custom calculation calculation based on start_date
+    const start = parseISO(profile.start_date);
+    const today = new Date();
+
+    // Normalize to dates
+    start.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    const daysSinceStart = differenceInDays(today, start);
+
+    // Weeks since start (Floor gets complete weeks passed)
+    if (daysSinceStart >= 0) {
+      const weeksSinceStart = Math.floor(daysSinceStart / 7);
+      const cycleProgress = weeksSinceStart % profile.cycle_length_weeks;
+      isDeload = cycleProgress >= (profile.cycle_length_weeks - profile.deload_length_weeks);
+    } else {
+      isDeload = false; // Before start date
+    }
+  }
+
   return (
     <div className={`app-container ${isDeload ? 'deload' : 'load'}`}>
       <main className="content">
         <h1>{isDeload ? 'Deload' : 'Load'}</h1>
+        {profile && !showSettings && (
+          <p className="subtitle" style={{ fontSize: '1rem', opacity: 0.8, marginTop: '0.5rem' }}>
+            Based on {profile.cycle_length_weeks}-week cycle starting {profile.start_date}
+          </p>
+        )}
       </main>
 
-      <div className="button-group">
-        {!isSubscribed && (
-          <button className="action-button" onClick={handleEnablePush}>
-            Enable Push
+      {showSettings ? (
+        <Settings
+          session={session}
+          profile={profile}
+          onProfileUpdated={(updatedProfile) => {
+            setProfile(updatedProfile);
+            setShowSettings(false);
+          }}
+          onCancel={profile ? () => setShowSettings(false) : undefined}
+        />
+      ) : (
+        <div className="button-group">
+          {!isSubscribed && (
+            <button className="action-button" onClick={handleEnablePush}>
+              Enable Push
+            </button>
+          )}
+          {isSubscribed && (
+            <button className="action-button" onClick={handleTestPush}>
+              Test Push
+            </button>
+          )}
+          <button className="action-button" onClick={togglePause}>
+            {isPaused ? 'Resume' : 'Pause'} Tasks
           </button>
-        )}
-        {isSubscribed && (
-          <button className="action-button" onClick={handleTestPush}>
-            Test Push
+          <button className="action-button secondary" onClick={() => setShowSettings(true)}>
+            Settings
           </button>
-        )}
-        <button className="action-button" onClick={togglePause}>
-          {isPaused ? 'Resume' : 'Pause'} Tasks
-        </button>
-      </div>
+          <button className="action-button secondary" onClick={() => supabase.auth.signOut()}>
+            Log Out
+          </button>
+        </div>
+      )}
 
       {showIosPrompt && (
         <div className="ios-prompt">
