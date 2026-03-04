@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { differenceInDays, parseISO } from 'date-fns';
 import OneSignal from 'react-onesignal';
-import { Auth } from '@supabase/auth-ui-react';
-import { ThemeSupa } from '@supabase/auth-ui-shared';
+import { LoginForm } from './components/LoginForm';
 import { supabase } from './lib/supabase';
 import { Settings } from './components/Settings';
 import './App.css';
@@ -184,19 +183,7 @@ function App() {
       <div className="auth-container" style={{ padding: '2rem', maxWidth: '400px', margin: '0 auto', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>LoadTracker</h1>
         {supabase ? (
-          <div className="auth-wrapper" style={{ background: 'rgba(255,255,255,0.05)', padding: '2rem', borderRadius: '12px' }}>
-            <Auth
-              supabaseClient={supabase}
-              appearance={{
-                theme: ThemeSupa,
-                style: {
-                  button: { background: 'white', color: 'black' },
-                  input: { color: 'white' }
-                }
-              }}
-              providers={[]}
-            />
-          </div>
+          <LoginForm />
         ) : (
           <p style={{ textAlign: 'center', color: '#ff6b6b' }}>
             Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.
