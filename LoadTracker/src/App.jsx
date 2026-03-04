@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { differenceInDays, parseISO } from 'date-fns';
+import { differenceInDays, parseISO, format } from 'date-fns';
 import OneSignal from 'react-onesignal';
 import { LoginForm } from './components/LoginForm';
 import { supabase } from './lib/supabase';
@@ -199,6 +199,7 @@ function App() {
 
   // Calculate current week and cycle based on profile
   let isDeload = false;
+  let daysUntilNextPhase = 0;
 
   if (profile) {
     // Custom calculation calculation based on start_date
@@ -211,24 +212,36 @@ function App() {
 
     const daysSinceStart = differenceInDays(today, start);
 
-    // Weeks since start (Floor gets complete weeks passed)
+    const cycleLengthDays = profile.cycle_length_weeks * 7;
+    const loadLengthDays = (profile.cycle_length_weeks - profile.deload_length_weeks) * 7;
+
+    // Days into cycle to determine phase
     if (daysSinceStart >= 0) {
-      const weeksSinceStart = Math.floor(daysSinceStart / 7);
-      const cycleProgress = weeksSinceStart % profile.cycle_length_weeks;
-      isDeload = cycleProgress >= (profile.cycle_length_weeks - profile.deload_length_weeks);
+      const daysIntoCycle = daysSinceStart % cycleLengthDays;
+      isDeload = daysIntoCycle >= loadLengthDays;
+
+      if (isDeload) {
+        daysUntilNextPhase = cycleLengthDays - daysIntoCycle;
+      } else {
+        daysUntilNextPhase = loadLengthDays - daysIntoCycle;
+      }
     } else {
       isDeload = false; // Before start date
+      daysUntilNextPhase = Math.abs(daysSinceStart); // Days until it starts
     }
   }
 
   return (
     <div className={`app-container ${isDeload ? 'deload' : 'load'}`}>
       <main className="content">
-        <h1>{isDeload ? 'Deload' : 'Load'}</h1>
+        <h1>{isDeload ? 'DELOAD' : 'LOAD'}</h1>
         {profile && !showSettings && (
-          <p className="subtitle" style={{ fontSize: '1rem', opacity: 0.8, marginTop: '0.5rem' }}>
-            Based on {profile.cycle_length_weeks}-week cycle starting {profile.start_date}
-          </p>
+          <div className="status-info">
+            <h2 className="next-phase">Next {isDeload ? 'LOAD' : 'DELOAD'} is in {daysUntilNextPhase} {daysUntilNextPhase === 1 ? 'Day' : 'Days'}</h2>
+            <p className="cycle-context">
+              Based on a {profile.cycle_length_weeks}-week cycle starting {format(parseISO(profile.start_date), 'MMM d, yyyy')}
+            </p>
+          </div>
         )}
       </main>
 
