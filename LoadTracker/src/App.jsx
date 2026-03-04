@@ -15,6 +15,7 @@ function App() {
   const [profile, setProfile] = useState(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(!!supabase);
 
   const [isPaused, setIsPaused] = useState(false);
   const [showIosPrompt, setShowIosPrompt] = useState(false);
@@ -25,10 +26,12 @@ function App() {
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      setIsInitializing(false);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      setIsInitializing(false);
     });
 
     return () => subscription.unsubscribe();
@@ -177,6 +180,15 @@ function App() {
       alert("Error showing test push: " + error.message);
     }
   };
+
+  if (isInitializing) {
+    return (
+      <div className="auth-container" style={{ padding: '2rem', maxWidth: '400px', margin: '0 auto', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>LoadTracker</h1>
+        <p style={{ textAlign: 'center' }}>Loading...</p>
+      </div>
+    );
+  }
 
   if (!session) {
     return (
