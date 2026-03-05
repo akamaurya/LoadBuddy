@@ -11,6 +11,16 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 Deno.serve(async (req) => {
     try {
+        // --- Auth guard: only allow requests with a valid CRON_SECRET ---
+        const cronSecret = Deno.env.get("CRON_SECRET");
+        const authHeader = req.headers.get("Authorization");
+        if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+            return new Response(JSON.stringify({ error: "Unauthorized" }), {
+                status: 401,
+                headers: { "Content-Type": "application/json" },
+            });
+        }
+
         const { data: profiles, error } = await supabase.from('profiles').select('*');
         if (error) throw error;
 
