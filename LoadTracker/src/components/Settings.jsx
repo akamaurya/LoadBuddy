@@ -2,15 +2,15 @@ import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 
 const TIMEZONE_OPTIONS = [
-    { label: 'US Pacific', value: 'America/Los_Angeles', offset: 'UTC-8 / UTC-7' },
-    { label: 'US Mountain', value: 'America/Denver', offset: 'UTC-7 / UTC-6' },
-    { label: 'US Central', value: 'America/Chicago', offset: 'UTC-6 / UTC-5' },
-    { label: 'US Eastern', value: 'America/New_York', offset: 'UTC-5 / UTC-4' },
-    { label: 'UK / GMT', value: 'Europe/London', offset: 'UTC+0 / UTC+1' },
-    { label: 'Central Europe', value: 'Europe/Berlin', offset: 'UTC+1 / UTC+2' },
-    { label: 'India (IST)', value: 'Asia/Kolkata', offset: 'UTC+5:30' },
-    { label: 'Japan (JST)', value: 'Asia/Tokyo', offset: 'UTC+9' },
-    { label: 'Australia East', value: 'Australia/Sydney', offset: 'UTC+10 / UTC+11' },
+    { label: 'US Pacific', value: 'America/Los_Angeles', offset: 'UTC - 8 / UTC - 7' },
+    { label: 'US Mountain', value: 'America/Denver', offset: 'UTC - 7 / UTC - 6' },
+    { label: 'US Central', value: 'America/Chicago', offset: 'UTC - 6 / UTC - 5' },
+    { label: 'US Eastern', value: 'America/New_York', offset: 'UTC - 5 / UTC - 4' },
+    { label: 'UK / GMT', value: 'Europe/London', offset: 'UTC + 0 / UTC + 1' },
+    { label: 'Central Europe', value: 'Europe/Berlin', offset: 'UTC + 1 / UTC + 2' },
+    { label: 'India (IST)', value: 'Asia/Kolkata', offset: 'UTC + 5:30' },
+    { label: 'Japan (JST)', value: 'Asia/Tokyo', offset: 'UTC + 9' },
+    { label: 'Australia East', value: 'Australia/Sydney', offset: 'UTC + 10 / UTC + 11' },
 ];
 
 function detectTimezone() {
@@ -22,7 +22,7 @@ function detectTimezone() {
     return match ? detected : 'America/New_York'; // fallback
 }
 
-export function Settings({ session, profile, onProfileUpdated, onCancel }) {
+export function Settings({ session, profile, onProfileUpdated, onCancel, isDeload }) {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         start_date: profile?.start_date || new Date().toISOString().split('T')[0],
@@ -36,9 +36,7 @@ export function Settings({ session, profile, onProfileUpdated, onCancel }) {
     });
 
     const handleChange = (e) => {
-        const { name, value, type } = e.target;
-        // Fix: always update with value. The type condition was causing an issue 
-        // with how the state was updating if not properly handled
+        const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: value,
@@ -76,97 +74,169 @@ export function Settings({ session, profile, onProfileUpdated, onCancel }) {
         }
     };
 
+    // Ordinal suffix helper
+    const getOrdinal = (n) => {
+        const s = ['th', 'st', 'nd', 'rd'];
+        const v = n % 100;
+        return n + (s[(v - 20) % 10] || s[v] || s[0]);
+    };
+
+    // Format the date for display as "1st Jan 2026"
+    const formatDisplayDate = (dateStr) => {
+        if (!dateStr) return '';
+        try {
+            const d = new Date(dateStr + 'T00:00:00');
+            const day = getOrdinal(d.getDate());
+            const month = d.toLocaleDateString('en-US', { month: 'short' });
+            const year = d.getFullYear();
+            return `${day} ${month} ${year}`;
+        } catch {
+            return dateStr;
+        }
+    };
+
+    const themeClass = isDeload ? 'settings-deload' : 'settings-load';
+
     return (
-        <div className="settings-modal" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(255,255,255,0.05)', padding: '2rem', paddingBottom: 'calc(2rem + 80px)', borderRadius: '12px', maxHeight: '85vh', overflowY: 'auto' }}>
-            <h2>Preferences</h2>
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className={`settings-container ${themeClass}`}>
+            {/* State Title */}
+            <div className="settings-title">
+                {isDeload ? 'DELOAD' : 'LOAD'}
+            </div>
 
-                {/* Training Block Start Date */}
-                <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', textAlign: 'left' }}>
-                    Training Block Start Date:
-                    <input type="date" name="start_date" value={formData.start_date} onChange={handleChange} required style={{ padding: '0.5rem', borderRadius: '4px' }} />
-                </label>
+            {/* Inner Card */}
+            <div className="settings-card">
+                <div className="settings-card-content">
+                    {/* Preferences Heading */}
+                    <h2 className="settings-heading">Preferences</h2>
 
-                {/* Cycle Length */}
-                <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', textAlign: 'left' }}>
-                    Cycle Length (Weeks):
-                    <input type="number" name="cycle_length_weeks" min="1" value={formData.cycle_length_weeks} onChange={handleChange} required style={{ padding: '0.5rem', borderRadius: '4px' }} />
-                </label>
+                    {/* Form */}
+                    <form className="settings-form" onSubmit={handleSubmit}>
 
-                {/* Deload Length */}
-                <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', textAlign: 'left' }}>
-                    Deload Length (Weeks):
-                    <input type="number" name="deload_length_weeks" min="1" max={formData.cycle_length_weeks} value={formData.deload_length_weeks} onChange={handleChange} required style={{ padding: '0.5rem', borderRadius: '4px' }} />
-                </label>
-
-                {/* Timezone Radio Buttons */}
-                <fieldset className="timezone-fieldset">
-                    <legend>Timezone:</legend>
-                    <div className="timezone-radio-group">
-                        {TIMEZONE_OPTIONS.map((tz) => (
-                            <label
-                                key={tz.value}
-                                className={`timezone-radio-label ${formData.timezone === tz.value ? 'selected' : ''}`}
-                                onClick={() => handleTimezoneChange(tz.value)}
-                            >
-                                <input
-                                    type="radio"
-                                    name="timezone"
-                                    value={tz.value}
-                                    checked={formData.timezone === tz.value}
-                                    onChange={() => handleTimezoneChange(tz.value)}
-                                    className="timezone-radio-input"
-                                />
-                                <span className="timezone-radio-text">
-                                    <span className="tz-name">{tz.label}</span>
-                                    <span className="tz-offset">{tz.offset}</span>
+                        {/* Training Block Start Date */}
+                        <div className="settings-field-row">
+                            <span className="settings-field-label">Training Block Start Date:</span>
+                            <div className="settings-field-value" style={{ position: 'relative', cursor: 'pointer' }} onClick={() => document.getElementById('settings-date-input').showPicker?.()}>
+                                <span style={{ color: '#fff', fontFamily: "'Helvetica Neue', Arial, sans-serif", fontWeight: 500, fontSize: 'clamp(0.875rem, 4vw, 1.5rem)' }}>
+                                    {formatDisplayDate(formData.start_date)}
                                 </span>
-                            </label>
-                        ))}
-                    </div>
-                </fieldset>
+                                <input
+                                    id="settings-date-input"
+                                    type="date"
+                                    name="start_date"
+                                    value={formData.start_date}
+                                    onChange={handleChange}
+                                    required
+                                    style={{ position: 'absolute', opacity: 0, width: '100%', height: '100%', top: 0, left: 0, cursor: 'pointer' }}
+                                />
+                            </div>
+                        </div>
 
-                {/* Notification Hour */}
-                <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', textAlign: 'left' }}>
-                    Notification Hour (0-23):
-                    <input
-                        type="number"
-                        name="notification_hour"
-                        min="0"
-                        max="23"
-                        value={formData.notification_hour}
-                        onChange={handleChange}
-                        required
-                        style={{ padding: '0.5rem', borderRadius: '4px' }}
-                    />
-                </label>
+                        {/* Cycle Length */}
+                        <div className="settings-field-row">
+                            <span className="settings-field-label">Cycle Length (Weeks):</span>
+                            <div className="settings-field-value">
+                                <input
+                                    type="number"
+                                    name="cycle_length_weeks"
+                                    min="1"
+                                    value={formData.cycle_length_weeks}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                        </div>
 
-                {/* Notification Days Before */}
-                <label style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', textAlign: 'left' }}>
-                    Notify me before cycle change (Days):
-                    <input
-                        type="number"
-                        name="notification_days_before"
-                        min="1"
-                        max="30"
-                        value={formData.notification_days_before}
-                        onChange={handleChange}
-                        required
-                        style={{ padding: '0.5rem', borderRadius: '4px' }}
-                    />
-                </label>
+                        {/* Deload Length */}
+                        <div className="settings-field-row">
+                            <span className="settings-field-label">Deload Length (Weeks):</span>
+                            <div className="settings-field-value">
+                                <input
+                                    type="number"
+                                    name="deload_length_weeks"
+                                    min="1"
+                                    max={formData.cycle_length_weeks}
+                                    value={formData.deload_length_weeks}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                        </div>
 
-                <div className="button-group-settings" style={{ marginTop: '2rem', display: 'flex', gap: '15px', justifyContent: 'center' }}>
-                    <button type="submit" disabled={loading} className="action-button">
-                        {loading ? 'Saving...' : 'Save'}
-                    </button>
-                    {onCancel && (
-                        <button type="button" onClick={onCancel} className="action-button secondary">
-                            Cancel
-                        </button>
-                    )}
+                        {/* Timezone */}
+                        <div className="settings-tz-section">
+                            <span className="settings-tz-label">Timezone:</span>
+                            <div className="settings-tz-list">
+                                {TIMEZONE_OPTIONS.map((tz) => (
+                                    <label
+                                        key={tz.value}
+                                        className={`settings-tz-item ${formData.timezone === tz.value ? 'selected' : ''}`}
+                                        onClick={() => handleTimezoneChange(tz.value)}
+                                    >
+                                        <input
+                                            type="radio"
+                                            name="timezone"
+                                            value={tz.value}
+                                            checked={formData.timezone === tz.value}
+                                            onChange={() => handleTimezoneChange(tz.value)}
+                                            className="settings-tz-radio"
+                                        />
+                                        <div className="settings-tz-left">
+                                            <span className="settings-tz-dot" />
+                                            <span className="settings-tz-name">{tz.label}</span>
+                                        </div>
+                                        <span className="settings-tz-offset">{tz.offset}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Notification Hour */}
+                        <div className="settings-field-row">
+                            <span className="settings-field-label">Notification Hour (0-23):</span>
+                            <div className="settings-field-value">
+                                <input
+                                    type="number"
+                                    name="notification_hour"
+                                    min="0"
+                                    max="23"
+                                    value={formData.notification_hour}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        {/* Notify Before Cycle Change */}
+                        <div className="settings-field-row">
+                            <span className="settings-field-label">Notify me before cycle change (Days):</span>
+                            <div className="settings-field-value">
+                                <input
+                                    type="number"
+                                    name="notification_days_before"
+                                    min="1"
+                                    max="30"
+                                    value={formData.notification_days_before}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        {/* Button Row */}
+                        <div className="settings-btn-row">
+                            <button type="submit" disabled={loading} className="settings-btn">
+                                <span>{loading ? 'Saving...' : 'Save'}</span>
+                            </button>
+                            {onCancel && (
+                                <button type="button" onClick={onCancel} className="settings-btn">
+                                    <span>Cancel</span>
+                                </button>
+                            )}
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
     );
 }

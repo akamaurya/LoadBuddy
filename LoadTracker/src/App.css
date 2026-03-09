@@ -364,3 +364,300 @@ body,
   opacity: 0.7;
   white-space: nowrap;
 }
+
+/* ======================================
+   Settings Page Redesign
+   ====================================== */
+
+/* LOAD theme custom properties */
+.settings-load {
+  --settings-bg: #00D066;
+  --settings-card-bg: #27D36E;
+  --settings-pill-bg: rgba(30, 176, 92, 0.2);
+  --settings-radio-dot: #137E40;
+  --settings-offset-color: #B4E1C0;
+  --settings-btn-bg: rgba(0, 85, 42, 0.3);
+}
+
+/* DELOAD theme custom properties */
+.settings-deload {
+  --settings-bg: #E67D23;
+  --settings-card-bg: #EE8D3A;
+  --settings-pill-bg: rgba(197, 116, 36, 0.2);
+  --settings-radio-dot: #AF601B;
+  --settings-offset-color: #E9B991;
+  --settings-btn-bg: rgba(197, 116, 36, 0.3);
+}
+
+/* Full-screen settings container */
+.settings-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  gap: 20px;
+  width: 100%;
+  height: 100%;
+  background: var(--settings-bg);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 100;
+}
+
+/* State title (LOAD / DELOAD) */
+.settings-title {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 700;
+  font-size: clamp(3rem, 18vw, 6rem);
+  line-height: 1.2;
+  color: #FFFFFF;
+  text-align: center;
+  padding: 10px 0;
+  text-transform: uppercase;
+}
+
+/* Inner card */
+.settings-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  gap: 10px;
+  width: 100%;
+  max-width: 570px;
+  background: var(--settings-card-bg);
+  border-radius: 12px;
+}
+
+/* Card content area (holds heading + fields) */
+.settings-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 18px;
+  gap: 25px;
+  width: 100%;
+}
+
+/* Preferences heading */
+.settings-heading {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 500;
+  font-size: clamp(1.5rem, 6vw, 2.25rem);
+  line-height: 1.22;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+/* Form container */
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 25px;
+  width: 100%;
+}
+
+/* Horizontal field row: label + pill */
+.settings-field-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+/* Field label */
+.settings-field-label {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 400;
+  font-size: clamp(0.875rem, 4vw, 1.5rem);
+  line-height: 1.2;
+  color: #FFFFFF;
+  white-space: nowrap;
+}
+
+/* Pill-shaped value container */
+.settings-field-value {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 20px;
+  min-width: 70px;
+  background: var(--settings-pill-bg);
+  border-radius: 16px;
+}
+
+.settings-field-value input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #FFFFFF;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 500;
+  font-size: clamp(0.875rem, 4vw, 1.5rem);
+  line-height: 1.2;
+  text-align: center;
+  width: 100%;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.settings-field-value input::-webkit-outer-spin-button,
+.settings-field-value input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Date input specific styling */
+.settings-field-value input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  color-scheme: dark;
+}
+
+/* Timezone section */
+.settings-tz-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+}
+
+.settings-tz-label {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 400;
+  font-size: clamp(0.875rem, 4vw, 1.5rem);
+  line-height: 1.2;
+  color: #FFFFFF;
+}
+
+/* Timezone radio list — show 4 items, scroll for the rest */
+.settings-tz-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  max-height: 180px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Individual timezone radio item */
+.settings-tz-item {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  width: 100%;
+  background: var(--settings-pill-bg);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border: none;
+}
+
+.settings-tz-item:hover {
+  background: var(--settings-pill-bg);
+  filter: brightness(1.1);
+}
+
+/* Left side: dot + name */
+.settings-tz-left {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+/* Radio dot */
+.settings-tz-dot {
+  box-sizing: border-box;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--settings-radio-dot);
+  border: 2px solid rgba(59, 59, 59, 0.47);
+  flex-shrink: 0;
+  transition: box-shadow 0.15s ease;
+}
+
+.settings-tz-item.selected .settings-tz-dot {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.4);
+}
+
+/* Timezone name */
+.settings-tz-name {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 500;
+  font-size: clamp(0.8rem, 3.5vw, 1.25rem);
+  line-height: 1.2;
+  color: #FFFFFF;
+}
+
+/* Timezone offset text */
+.settings-tz-offset {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 500;
+  font-size: clamp(0.8rem, 3.5vw, 1.25rem);
+  line-height: 1.2;
+  color: var(--settings-offset-color);
+  white-space: nowrap;
+}
+
+/* Hidden radio input */
+.settings-tz-radio {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Bottom button row */
+.settings-btn-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 20px 0 20px;
+  gap: 10px;
+  width: 100%;
+}
+
+/* Settings button */
+.settings-btn {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 40px;
+  background: var(--settings-btn-bg);
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.settings-btn:active {
+  transform: scale(0.97);
+}
+
+.settings-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.settings-btn span {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 400;
+  font-size: clamp(0.875rem, 4vw, 1.5rem);
+  line-height: 1.2;
+  color: #FFFFFF;
+}

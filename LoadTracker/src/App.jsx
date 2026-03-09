@@ -261,6 +261,7 @@ function App() {
         <Settings
           session={session}
           profile={profile}
+          isDeload={isDeload}
           onProfileUpdated={(updatedProfile) => {
             setProfile(updatedProfile);
             setShowSettings(false);
