@@ -4,6 +4,10 @@ import OneSignal from 'react-onesignal';
 import { LoginForm } from './components/LoginForm';
 import { supabase } from './lib/supabase';
 import { Settings } from './components/Settings';
+import { OnboardingWizard } from './components/OnboardingWizard';
+import { LandingPage } from './components/LandingPage';
+import { PWAPrompt } from './components/PWAPrompt';
+import { shouldShowPWAPrompt } from './lib/pwaUtils'; // ADDED
 import './App.css';
 import { Analytics } from '@vercel/analytics/react';
 
@@ -16,9 +20,11 @@ function App() {
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [isInitializing, setIsInitializing] = useState(!!supabase);
+  const [authView, setAuthView] = useState('landing'); // 'landing' or 'login'
 
   const [isPaused, setIsPaused] = useState(false);
-  const [showIosPrompt, setShowIosPrompt] = useState(false);
+  // Flow states
+  const [hasCompletedPwaPrompt, setHasCompletedPwaPrompt] = useState(!shouldShowPWAPrompt());
   const [isSubscribed, setIsSubscribed] = useState(true);
 
   useEffect(() => {
@@ -54,11 +60,12 @@ function App() {
 
       if (data) {
         setProfile(data);
+        setShowSettings(false); // They have a profile, they are a returning user
       } else if (error && error.code !== 'PGRST116') { // PGRST116 is No Rows Found
         console.error("Error fetching profile", error);
-        setShowSettings(true);
+        setShowSettings(true); // Treat as new user or error state requiring setup
       } else {
-        setShowSettings(true); // Force settings if no profile
+        setShowSettings(true); // New user (needs questionnaire)
       }
       setIsLoadingProfile(false);
     }
@@ -68,19 +75,7 @@ function App() {
   const localUserId = session?.user?.id;
 
   useEffect(() => {
-    // 1. Check for iOS and if it's already installed (standalone mode)
-    const isIos = () => {
-      const userAgent = window.navigator.userAgent.toLowerCase();
-      return /iphone|ipad|ipod/.test(userAgent);
-    };
-
-    const isStandalone = () => {
-      return ('standalone' in window.navigator) && (window.navigator.standalone);
-    };
-
-    if (isIos() && !isStandalone()) {
-      setShowIosPrompt(true);
-    }
+    // 1. PWA Check is now handled by PWAPrompt component
 
     // 2. Load cached pause state
     const savedPauseState = localStorage.getItem('loadtracker_paused');
@@ -191,24 +186,81 @@ function App() {
   }
 
   if (!session) {
+    if (authView === 'landing') {
+      return (
+        <>
+          <LandingPage onSignIn={() => setAuthView('login')} onSignUp={() => setAuthView('login')} />
+          <Analytics />
+        </>
+      );
+    }
+
     return (
       <div className="auth-container" style={{ padding: '2rem', maxWidth: '400px', margin: '0 auto', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>LoadTracker</h1>
         {supabase ? (
-          <LoginForm />
+          <div>
+            <button
+              onClick={() => setAuthView('landing')}
+              style={{ background: 'transparent', color: '#fff', border: '1px solid rgba(255,255,255,0.3)', marginBottom: '20px', fontSize: '14px', borderRadius: '8px', padding: '8px 16px', cursor: 'pointer' }}
+            >
+              ← Back
+            </button>
+            <LoginForm />
+          </div>
         ) : (
           <p style={{ textAlign: 'center', color: '#ff6b6b' }}>
             Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.
           </p>
         )}
+        <Analytics />
       </div>
     );
   }
 
+  // Block 1: Is the profile loading?
   if (isLoadingProfile) {
     return <div className="loading" style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading profile...</div>;
   }
 
+  // Block 2: Are they a first time user? (Settings / Questionnaire)
+  if (showSettings) {
+    if (!profile) {
+      // First Time User
+      return (
+        <OnboardingWizard 
+          session={session} 
+          onComplete={(newProfile) => {
+            setProfile(newProfile);
+            setShowSettings(false);
+          }}
+        />
+      );
+    } else {
+      // Returning user wanting to access Settings dashboard
+      return (
+        <div className="auth-app-view">
+          <Settings
+            session={session}
+            profile={profile}
+            isDeload={isDeload}
+            onProfileUpdated={(updatedProfile) => {
+              setProfile(updatedProfile);
+              setShowSettings(false); // Move to next step in flow
+            }}
+            onCancel={profile ? () => setShowSettings(false) : undefined}
+          />
+        </div>
+      );
+    }
+  }
+
+  // Block 3: Have they seen the PWA Prompt?
+  if (!hasCompletedPwaPrompt) {
+    return <PWAPrompt onContinue={() => setHasCompletedPwaPrompt(true)} />;
+  }
+
+  // Block 4: Main Application View (Load/Deload)
   // Calculate current week and cycle based on profile
   let isDeload = false;
   let daysUntilNextPhase = 0;
@@ -244,7 +296,7 @@ function App() {
   }
 
   return (
-    <div className={`app-container ${isDeload ? 'deload' : 'load'}`}>
+    <div className={`app-container ${isDeload ? 'deload' : 'load'} auth-app-view`}>
       <main className="content">
         <h1>{isDeload ? 'DELOAD' : 'LOAD'}</h1>
         {profile && !showSettings && (
@@ -257,46 +309,29 @@ function App() {
         )}
       </main>
 
-      {showSettings ? (
-        <Settings
-          session={session}
-          profile={profile}
-          isDeload={isDeload}
-          onProfileUpdated={(updatedProfile) => {
-            setProfile(updatedProfile);
-            setShowSettings(false);
-          }}
-          onCancel={profile ? () => setShowSettings(false) : undefined}
-        />
-      ) : (
-        <div className="button-group">
-          {!isSubscribed && (
-            <button className="action-button" onClick={handleEnablePush}>
-              Enable Push
-            </button>
-          )}
-          {isSubscribed && (
-            <button className="action-button" onClick={handleTestPush}>
-              Test Push
-            </button>
-          )}
-          <button className="action-button" onClick={togglePause}>
-            {isPaused ? 'Resume' : 'Pause'} Tasks
+      <div className="button-group">
+        {!isSubscribed && (
+          <button className="action-button" onClick={handleEnablePush}>
+            Enable Push
           </button>
-          <button className="action-button secondary" onClick={() => setShowSettings(true)}>
-            Settings
+        )}
+        {isSubscribed && (
+          <button className="action-button" onClick={handleTestPush}>
+            Test Push
           </button>
-          <button className="action-button secondary" onClick={() => supabase.auth.signOut()}>
-            Log Out
-          </button>
-        </div>
-      )}
+        )}
+        <button className="action-button" onClick={togglePause}>
+          {isPaused ? 'Resume' : 'Pause'} Tasks
+        </button>
+        <button className="action-button secondary" onClick={() => setShowSettings(true)}>
+          Settings
+        </button>
+        <button className="action-button secondary" onClick={() => supabase.auth.signOut()}>
+          Log Out
+        </button>
+      </div>
 
-      {showIosPrompt && (
-        <div className="ios-prompt">
-          <p>Tap <span className="icon">⬇️ Share</span> and then<br /><strong>Add to Home Screen</strong><br />to install the LoadTracker app & enable notifications.</p>
-        </div>
-      )}
+      {/* Removed old ios-prompt */}
       <Analytics />
     </div>
   );

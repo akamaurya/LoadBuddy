@@ -1,0 +1,258 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@500&display=swap');
+
+.onboarding-wrap {
+  font-family: 'DM Sans', sans-serif;
+  background: #16a34a;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.onboarding-logo {
+  font-family: 'DM Mono', monospace;
+  font-size: 28px;
+  font-weight: 500;
+  color: #fff;
+  letter-spacing: 2px;
+  margin-bottom: 1.5rem;
+}
+
+.onboarding-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.onboarding-pdot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  transition: all .3s;
+}
+
+.onboarding-pdot.active {
+  background: #fff;
+  width: 24px;
+  border-radius: 4px;
+}
+
+.onboarding-pdot.done {
+  background: rgba(255,255,255,0.7);
+}
+
+.onboarding-card {
+  background: #22c55e;
+  border-radius: 20px;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 340px;
+}
+
+.onboarding-step-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.7);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.onboarding-step-head {
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 1.5rem;
+}
+
+.onboarding-field {
+  margin-bottom: 1rem;
+}
+
+.onboarding-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.75);
+  margin-bottom: 6px;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+.onboarding-field input, .onboarding-field select {
+  width: 100%;
+  background: #16a34a;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 15px;
+  font-family: 'DM Sans', sans-serif;
+  color: #fff;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.onboarding-field input::placeholder {
+  color: rgba(255,255,255,0.4);
+}
+
+.onboarding-field input:focus, .onboarding-field select:focus {
+  background: #15803d;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.3);
+}
+
+.onboarding-field select option {
+  background: #16a34a;
+  color: #fff;
+}
+
+.onboarding-field input[type=number]::-webkit-inner-spin-button {
+  opacity: 1;
+  filter: invert(1);
+}
+
+.onboarding-tz-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #16a34a;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.onboarding-tz-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+  flex-shrink: 0;
+}
+
+.onboarding-tz-text {
+  font-size: 15px;
+  color: #fff;
+  flex: 1;
+}
+
+.onboarding-tz-badge {
+  font-size: 11px;
+  color: rgba(255,255,255,0.6);
+  background: rgba(0,0,0,0.15);
+  padding: 3px 7px;
+  border-radius: 6px;
+}
+
+.onboarding-btn-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 1.5rem;
+}
+
+.onboarding-btn {
+  flex: 1;
+  padding: 13px;
+  border-radius: 10px;
+  border: none;
+  font-size: 15px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.btn-back {
+  background: rgba(0,0,0,0.15);
+  color: rgba(255,255,255,0.8);
+}
+
+.btn-next {
+  background: #fff;
+  color: #16a34a;
+}
+
+.btn-next:hover:not(:disabled) {
+  background: #f0fdf4;
+}
+
+.btn-next:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-back:hover {
+  background: rgba(0,0,0,0.25);
+}
+
+.onboarding-row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.onboarding-hint {
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+  margin-top: 4px;
+  padding-left: 2px;
+}
+
+.onboarding-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: .5px solid rgba(255,255,255,0.15);
+}
+
+.onboarding-summary-row:last-child {
+  border-bottom: none;
+}
+
+.onboarding-summary-label {
+  font-size: 13px;
+  color: rgba(255,255,255,0.65);
+}
+
+.onboarding-summary-val {
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  text-align: right;
+  max-width: 60%;
+}
+
+.onboarding-step {
+  display: none;
+}
+
+.onboarding-step.active {
+  display: block;
+}
+
+.onboarding-confetti-wrap {
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.big-check {
+  font-size: 48px;
+  margin-bottom: .75rem;
+}
+
+.done-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: .5rem;
+}
+
+.done-sub {
+  font-size: 14px;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.6;
+}

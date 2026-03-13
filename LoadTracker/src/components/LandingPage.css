@@ -1,0 +1,545 @@
+/* Mobile-First Landing Page Styles */
+
+:root {
+  --lb-bg: #0C0C0C;      /* Very dark, almost black background for the whole page */
+  --lb-card-bg: #111111; /* Slightly lighter for cards */
+  --lb-gray-border: #2A2A2A; 
+  --lb-green: #00D066;
+  --lb-orange: #E67D23;
+  --lb-text-main: #FFFFFF;
+  --lb-text-muted: rgba(255, 255, 255, 0.6);
+}
+
+.landing-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--lb-bg);
+  color: var(--lb-text-main);
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+/* ============================
+   Navigation
+   ============================ */
+.landing-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.nav-logo {
+  font-weight: 500;
+  font-size: 24px;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-btn {
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.1s;
+}
+
+.signin-btn {
+  background: transparent;
+  border: 1px solid var(--lb-gray-border);
+  border-radius: 6px;
+  padding: 8px 16px;
+  color: var(--lb-text-main);
+}
+
+.create-btn {
+  background: var(--lb-green);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  color: #000; /* Dark text for contrast on green */
+  font-weight: 600;
+}
+
+.nav-btn:active {
+  transform: scale(0.95);
+}
+
+/* ============================
+   Hero Section
+   ============================ */
+.hero-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 20px 0;
+  text-align: center;
+  position: relative;
+}
+
+.hero-title {
+  font-weight: 700;
+  font-size: clamp(36px, 10vw, 84px);
+  line-height: 1.1;
+  margin-bottom: 24px;
+  letter-spacing: -0.02em;
+}
+
+.hero-subtitle {
+  font-weight: 400;
+  font-size: clamp(16px, 4vw, 20px);
+  line-height: 1.5;
+  color: var(--lb-text-muted);
+  max-width: 600px;
+  margin: 0 auto 32px;
+}
+
+.hero-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto 60px;
+}
+
+.hero-btn {
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 16px;
+  padding: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.get-started-btn {
+  background: var(--lb-green);
+  border: none;
+  color: #000;
+}
+
+.view-science-btn {
+  background: transparent;
+  border: 1px solid var(--lb-gray-border);
+  color: var(--lb-text-main);
+}
+
+.hero-graphics {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  height: 450px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin-top: 40px;
+}
+
+.glow {
+  position: absolute;
+  width: 300px;
+  height: 500px;
+  border-radius: 50%;
+  filter: blur(120px);
+  z-index: 0;
+  opacity: 0.5;
+}
+
+.green-glow {
+  background: var(--lb-green);
+  left: 0;
+  top: 0;
+}
+
+.orange-glow {
+  background: var(--lb-orange);
+  right: 0;
+  top: 0;
+}
+
+.phone-mockup {
+  position: absolute;
+  z-index: 1;
+}
+
+.phone-mockup img {
+  width: 220px;
+  height: auto;
+  border-radius: 34px;
+}
+
+.phone-load {
+  left: calc(50% - 230px);
+  top: 0;
+}
+
+.phone-deload {
+  right: calc(50% - 230px);
+  top: 0;
+}
+
+/* ============================
+   Burnout section
+   ============================ */
+.burnout-section {
+  padding: 40px 20px;
+  margin-top: 40px;
+}
+
+.burnout-card {
+  background: var(--lb-card-bg);
+  border: 1px solid var(--lb-gray-border);
+  border-radius: 16px;
+  padding: 32px 20px;
+  text-align: center;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.burnout-subtitle {
+  color: var(--lb-orange);
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.burnout-title {
+  font-weight: 700;
+  font-size: clamp(28px, 6vw, 48px);
+  margin-bottom: 20px;
+}
+
+.burnout-content {
+  color: var(--lb-text-muted);
+  font-size: 16px;
+  line-height: 1.6;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* ============================
+   Features Grid
+   ============================ */
+.features-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  padding: 40px 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.feature-card {
+  background: transparent;
+  border: 1px solid var(--lb-gray-border);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.feature-image {
+  width: 100%;
+  padding: 24px 24px 0 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.feature-image img {
+  width: 100%;
+  height: auto;
+  max-height: 250px;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.feature-text {
+  padding: 24px;
+}
+
+.feature-text h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  letter-spacing: -0.01em;
+}
+
+.feature-text p {
+  color: var(--lb-text-muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.highlight-green { color: var(--lb-green); font-weight: 500; }
+.highlight-orange { color: var(--lb-orange); font-weight: 500; }
+
+/* ============================
+   Science Section
+   ============================ */
+.science-section {
+  padding: 60px 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.science-header {
+  text-align: left;
+}
+
+.science-subtitle {
+  color: var(--lb-text-muted);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.science-header h2 {
+  font-size: clamp(28px, 6vw, 42px);
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+
+.science-description {
+  color: var(--lb-text-muted);
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.science-points {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: relative;
+}
+
+/* The vertical line connecting dots */
+.science-points::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--lb-gray-border);
+}
+
+.science-point {
+  display: flex;
+  gap: 20px;
+  position: relative;
+}
+
+.point-indicator {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  margin-top: 6px;
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.green-dot { background: var(--lb-green); box-shadow: 0 0 10px rgba(0, 208, 102, 0.4); }
+.orange-dot { background: var(--lb-orange); box-shadow: 0 0 10px rgba(230, 125, 35, 0.4); }
+.pink-dot { background: #E91E63; box-shadow: 0 0 10px rgba(233, 30, 99, 0.4); }
+
+.point-content h3 {
+  font-size: 18px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.point-content p {
+  color: var(--lb-text-muted);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* ============================
+   CTA Section
+   ============================ */
+.cta-section {
+  padding: 40px 20px 80px;
+}
+
+.cta-card {
+  background: var(--lb-card-bg);
+  border: 1px solid var(--lb-gray-border);
+  border-radius: 16px;
+  padding: 40px 20px;
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.cta-card h2 {
+  font-size: clamp(24px, 5vw, 36px);
+  margin-bottom: 16px;
+}
+
+.cta-card p {
+  color: var(--lb-text-muted);
+  font-size: 16px;
+  margin-bottom: 32px;
+}
+
+.cta-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.cta-form input {
+  background: #000;
+  border: 1px solid var(--lb-gray-border);
+  color: #fff;
+  padding: 16px;
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+}
+
+.cta-form input:focus {
+  border-color: var(--lb-green);
+}
+
+.cta-form .create-btn {
+  padding: 16px;
+  font-size: 16px;
+}
+
+/* ============================
+   Footer
+   ============================ */
+.landing-footer {
+  text-align: center;
+  padding: 24px;
+  color: var(--lb-text-muted);
+  font-size: 14px;
+  border-top: 1px solid var(--lb-gray-border);
+}
+
+
+/* ============================
+   Desktop Overrides
+   ============================ */
+@media (min-width: 768px) {
+  .landing-nav {
+    padding: 24px 40px;
+  }
+
+  .nav-btn {
+    font-size: 16px;
+  }
+
+  .nav-logo {
+    font-size: 32px;
+  }
+  
+  .hero-actions {
+    flex-direction: row;
+    max-width: 500px;
+  }
+
+  /* Make Glow and phones larger on desktop to match the screenshot */
+  .hero-graphics {
+    height: 550px;
+    max-width: 1000px;
+  }
+
+  .phone-mockup img {
+    width: 250px;
+  }
+
+  .phone-load {
+    left: calc(50% - 256px);
+  }
+
+  .phone-deload {
+    right: calc(50% - 256px);
+  }
+
+  .glow {
+    width: 600px;
+    height: 800px;
+  }
+  
+  .green-glow {
+    left: 0;
+    top: -100px;
+  }
+  
+  .orange-glow {
+    right: 0;
+    top: -100px;
+  }
+
+  .burnout-card {
+    padding: 60px;
+  }
+
+  /* 2x2 Grid for Desktop with identical spacing to mockup */
+  .features-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    padding: 60px 20px;
+    max-width: 1100px;
+  }
+
+  .feature-text h3 {
+    font-size: 24px;
+  }
+
+  .science-section {
+    flex-direction: row;
+    padding: 100px 20px;
+    max-width: 1100px;
+  }
+
+  .science-header {
+    flex: 1;
+    padding-right: 40px;
+  }
+
+  .science-points {
+    flex: 1;
+  }
+
+  .cta-card {
+    padding: 60px 40px;
+  }
+
+  .cta-form {
+    flex-direction: row;
+    max-width: 500px;
+  }
+
+  .cta-form input {
+    flex: 1;
+  }
+  
+  .cta-form .create-btn {
+    width: auto;
+  }
+}

@@ -1,0 +1,113 @@
+.pwa-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(5px);
+  padding: 20px;
+}
+
+.pwa-modal {
+  background: #151618;
+  border: 1px solid #6E6E6E;
+  border-radius: 20px;
+  padding: 30px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  color: white;
+  animation: modalPop 0.3s ease-out forwards;
+}
+
+@keyframes modalPop {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.pwa-title {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-style: normal;
+  font-weight: 700;
+  font-size: 24px;
+  margin-bottom: 15px;
+  color: #00D066;
+}
+
+.pwa-text {
+  font-size: 16px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 25px;
+}
+
+.pwa-instructions {
+  background: #020202;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 25px;
+  text-align: left;
+}
+
+.pwa-instructions p {
+  font-size: 14px;
+  margin-bottom: 10px;
+  color: #FFFFFF;
+}
+
+.pwa-instructions p:last-child {
+  margin-bottom: 0;
+}
+
+.pwa-instructions .icon {
+  color: #007AFF; /* iOS Blue */
+  font-weight: bold;
+}
+
+.pwa-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pwa-btn {
+  padding: 14px;
+  border-radius: 10px;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.pwa-install-btn {
+  background: #00D066;
+  color: white;
+}
+
+.pwa-install-btn:hover {
+  background: #00e06d;
+}
+
+.pwa-skip-btn {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.pwa-skip-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
