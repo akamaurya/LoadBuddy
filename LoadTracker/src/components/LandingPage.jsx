@@ -32,10 +32,10 @@ export function LandingPage({ onSignIn, onSignUp }) {
             <div className="glow green-glow"></div>
             <div className="glow orange-glow"></div>
             <div className="phone-mockup phone-load">
-              <img src="/iPhone 17 Load.png" alt="Load Phase Interface" loading="lazy" />
+              <img src="/iPhone 17 Load.svg" alt="Load Phase Interface" loading="lazy" />
             </div>
             <div className="phone-mockup phone-deload">
-              <img src="/iPhone 17 DeLoad.png" alt="Deload Phase Interface" loading="lazy" />
+              <img src="/iPhone 17 DeLoad.svg" alt="Deload Phase Interface" loading="lazy" />
             </div>
           </div>
         </section>

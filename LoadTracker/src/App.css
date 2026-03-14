@@ -178,9 +178,13 @@ body,
 /* Login Form */
 .login-form-container {
   background: rgba(255, 255, 255, 0.06);
-  padding: 2rem;
+  padding: 1.5rem;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+  margin: 0 auto;
 }
 
 .login-tabs {

@@ -42,13 +42,13 @@
 .nav-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .nav-btn {
   font-family: inherit;
   font-weight: 500;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
   transition: opacity 0.2s ease, transform 0.1s;
 }
@@ -57,17 +57,19 @@
   background: transparent;
   border: 1px solid var(--lb-gray-border);
   border-radius: 6px;
-  padding: 8px 16px;
+  padding: 6px 12px;
   color: var(--lb-text-main);
+  white-space: nowrap;
 }
 
 .create-btn {
   background: var(--lb-green);
   border: none;
   border-radius: 6px;
-  padding: 8px 16px;
+  padding: 6px 12px;
   color: #000; /* Dark text for contrast on green */
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .nav-btn:active {
@@ -88,7 +90,7 @@
 
 .hero-title {
   font-weight: 700;
-  font-size: clamp(36px, 10vw, 84px);
+  font-size: clamp(32px, 8vw, 84px);
   line-height: 1.1;
   margin-bottom: 24px;
   letter-spacing: -0.02em;
@@ -137,55 +139,54 @@
 .hero-graphics {
   position: relative;
   width: 100%;
-  max-width: 600px;
-  height: 450px;
+  max-width: 1000px;
   display: flex;
+  flex-direction: row;
   justify-content: center;
   align-items: flex-start;
+  gap: clamp(16px, 4vw, 32px);
   margin-top: 40px;
+  padding: 0 16px;
 }
 
 .glow {
   position: absolute;
-  width: 300px;
-  height: 500px;
+  width: clamp(150px, 40vw, 300px);
+  height: clamp(250px, 60vw, 500px);
   border-radius: 50%;
-  filter: blur(120px);
+  filter: blur(80px);
   z-index: 0;
   opacity: 0.5;
 }
 
 .green-glow {
   background: var(--lb-green);
-  left: 0;
+  left: 10%;
   top: 0;
 }
 
 .orange-glow {
   background: var(--lb-orange);
-  right: 0;
+  right: 10%;
   top: 0;
 }
 
 .phone-mockup {
-  position: absolute;
+  position: relative;
   z-index: 1;
+  flex: 0 1 250px;
 }
 
 .phone-mockup img {
-  width: 220px;
+  width: 100%;
   height: auto;
-  border-radius: 34px;
+  border-radius: clamp(18px, 6vw, 34px);
 }
 
-.phone-load {
-  left: calc(50% - 230px);
-  top: 0;
-}
-
-.phone-deload {
-  right: calc(50% - 230px);
-  top: 0;
+.phone-load, .phone-deload {
+  left: auto;
+  transform: none;
+  top: auto;
 }
 
 /* ============================
@@ -457,27 +458,22 @@
     font-size: 32px;
   }
   
-  .hero-actions {
-    flex-direction: row;
-    max-width: 500px;
+  .nav-actions {
+    gap: 12px;
+  }
+  
+  .signin-btn, .create-btn {
+    padding: 8px 16px;
   }
 
-  /* Make Glow and phones larger on desktop to match the screenshot */
+  /* Desktop Overrides for Hero Graphics */
   .hero-graphics {
-    height: 550px;
-    max-width: 1000px;
+    gap: 32px;
+    padding-bottom: 0;
   }
 
   .phone-mockup img {
-    width: 250px;
-  }
-
-  .phone-load {
-    left: calc(50% - 256px);
-  }
-
-  .phone-deload {
-    right: calc(50% - 256px);
+    border-radius: 34px;
   }
 
   .glow {
