@@ -222,6 +222,18 @@
   margin-bottom: 20px;
 }
 
+.burnout-title a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--lb-gray-border);
+  text-underline-offset: 6px;
+  transition: text-decoration-color 0.2s ease;
+}
+
+.burnout-title a:hover {
+  text-decoration-color: var(--lb-green);
+}
+
 .burnout-content {
   color: var(--lb-text-muted);
   font-size: 16px;
@@ -367,6 +379,18 @@
   font-size: 18px;
   margin-bottom: 8px;
   font-weight: 600;
+}
+
+.point-content h3 a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--lb-gray-border);
+  text-underline-offset: 4px;
+  transition: text-decoration-color 0.2s ease;
+}
+
+.point-content h3 a:hover {
+  text-decoration-color: var(--lb-green);
 }
 
 .point-content p {

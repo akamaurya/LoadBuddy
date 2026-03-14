@@ -44,7 +44,11 @@ export function LandingPage({ onSignIn, onSignUp }) {
         <section className="burnout-section">
           <div className="burnout-card">
             <h3 className="burnout-subtitle">THE BURNOUT CRISIS</h3>
-            <h2 className="burnout-title">93% of gym-goers quit within 90 days</h2>
+            <h2 className="burnout-title">
+              <a href="https://fortisfitness.ca/how-we-are-set-up-to-fail-by-the-gym-industry-the-plot-thickens/" target="_blank" rel="noopener noreferrer">
+                93% of gym-goers quit within 90 days
+              </a>
+            </h2>
             <p className="burnout-content">
               It's not a lack of willpower. It's a biological failure to manage fatigue. When you train blindly, your central nervous system crashes. LoadBuddy mathematically enforces recovery before you hit the wall.
             </p>
@@ -112,7 +116,11 @@ export function LandingPage({ onSignIn, onSignUp }) {
             <div className="science-point">
               <div className="point-indicator green-dot"></div>
               <div className="point-content">
-                <h3>The Acute Chronic Workload Ratio</h3>
+                <h3>
+                  <a href="https://bjsm.bmj.com/content/51/5/452" target="_blank" rel="noopener noreferrer">
+                    The Acute Chronic Workload Ratio
+                  </a>
+                </h3>
                 <p>Keeping your training stress mathematically tethered to your rolling 28-day keeps you in the physiological "Sweet Spot" minimising soft-tissue injury risk.</p>
               </div>
             </div>
@@ -120,7 +128,11 @@ export function LandingPage({ onSignIn, onSignUp }) {
             <div className="science-point">
               <div className="point-indicator orange-dot"></div>
               <div className="point-content">
-                <h3>Active Deload vs Total Reset</h3>
+                <h3>
+                  <a href="https://peerj.com/articles/16777/" target="_blank" rel="noopener noreferrer">
+                    Active Deload vs Total Reset
+                  </a>
+                </h3>
                 <p>Taking a full week off causes neurological detraining. LoadBuddy enforces active deloading - cutting volume by 50% to drop inflammation while maintaining strength pathways.</p>
               </div>
             </div>
@@ -128,7 +140,11 @@ export function LandingPage({ onSignIn, onSignUp }) {
             <div className="science-point">
               <div className="point-indicator pink-dot"></div>
               <div className="point-content">
-                <h3>Psychological Resilience</h3>
+                <h3>
+                  <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11927186/" target="_blank" rel="noopener noreferrer">
+                    Psychological Resilience
+                  </a>
+                </h3>
                 <p>By visualising your recovery phases, LoadBuddy removes the guilt of resting. It proves that recovery isn't "quitting" - it's a programmed phase of growth.</p>
               </div>
             </div>
