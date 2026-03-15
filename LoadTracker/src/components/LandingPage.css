@@ -204,10 +204,11 @@
   display: flex;
   flex-direction: row;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   gap: clamp(16px, 4vw, 32px);
   margin-top: 40px;
   padding: 0 16px;
+  flex-wrap: wrap;
 }
 
 .glow {
@@ -248,6 +249,18 @@
   left: auto;
   transform: none;
   top: auto;
+}
+
+.hero-animation-wrapper {
+  flex: 1 1 100%;
+  order: -1;
+  border: 1px solid var(--lb-gray-border);
+  border-radius: clamp(18px, 6vw, 34px);
+  background: #040c06;
+  overflow: hidden;
+  position: relative;
+  z-index: 2;
+  aspect-ratio: 780 / 440;
 }
 
 /* ============================
@@ -567,6 +580,14 @@
   .hero-graphics {
     gap: 32px;
     padding-bottom: 0;
+    flex-wrap: nowrap;
+    align-items: center;
+    max-width: 1200px;
+  }
+
+  .hero-animation-wrapper {
+    flex: 0 1 531px;
+    order: 0;
   }
 
   .phone-mockup img {
