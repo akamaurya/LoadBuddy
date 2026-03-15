@@ -23,24 +23,32 @@ const content = {
     features: [
       {
         image: "/Frame 27.png",
+        width: 617,
+        height: 261,
         alt: "Binary Focus: Load or Deload",
         title: "Binary Focus. Zero Bloat.",
         desc: <>No spreadsheets. No complex logs. The entire screen is your biological signal. <span className="highlight-green">Green</span> means progressive overload. <span className="highlight-orange">Orange</span> means active recovery.</>
       },
       {
         image: "/Frame 27 (1).png",
+        width: 789,
+        height: 235,
         alt: "Customize Cycle Length",
         title: "Your Body. Your Cycles.",
         desc: "Not everyone fits a 4-week cycle. Customize your Load and Deload lengths to match your specific training block and physiology."
       },
       {
         image: "/Frame 43.png",
+        width: 628,
+        height: 251,
         alt: "Pause Tasks Button",
         title: "Pause Anytime.",
         desc: "Going on vacation? Sustained an injury? Pause your cycle with one tap and pick up exactly where you left off."
       },
       {
         image: "/Frame 30.png",
+        width: 632,
+        height: 259,
         alt: "Notification Preferences",
         title: "Automated Autoregulation.",
         desc: "Never miss a transition. Set custom push notification days in advance so you are mentally and physically prepared to shift from Load to Deload."
@@ -96,24 +104,32 @@ const content = {
     features: [
       {
         image: "/Frame 27.png",
+        width: 617,
+        height: 261,
         alt: "Binary Focus: Load or Deload",
         title: "Do cheezein. Koi bakwaas nahi.",
         desc: <>Na spreadsheets, na complex logs. Poora screen teri biological signal hai. <span className="highlight-green">Green</span> = progressive overload. <span className="highlight-orange">Orange</span> = chill mode. That's it.</>
       },
       {
         image: "/Frame 27 (1).png",
+        width: 789,
+        height: 235,
         alt: "Customize Cycle Length",
         title: "Tera body. Tera cycle. Teri marzi.",
         desc: "Har kisi pe 4-week cycle fit nahi hota — obvious hai. Load aur Deload customize karo apne hisaab se. No cap."
       },
       {
         image: "/Frame 43.png",
+        width: 628,
+        height: 251,
         alt: "Pause Tasks Button",
         title: "Ruk ja jab man kare.",
         desc: "Goa trip plan hai? Injury ho gayi? Ek tap mein pause karo. Waapas aao toh wahin se shuru — koi drama nahi."
       },
       {
         image: "/Frame 30.png",
+        width: 632,
+        height: 259,
         alt: "Notification Preferences",
         title: "Automatic Autoregulation. Zero bhool.",
         desc: "Koi transition miss mat karo yaar. Advance notifications set karo — Load se Deload shift ke liye mentally aur physically ready rehna padega. App remind karega."
@@ -179,7 +195,6 @@ export function LandingPage({ onSignIn, onSignUp }) {
           <button 
             className="lang-toggle-btn" 
             onClick={toggleLang}
-            aria-label="Toggle Language"
           >
             {lang === 'en' ? '🇮🇳 Hinglish' : '🇬🇧 English'}
           </button>
@@ -208,13 +223,13 @@ export function LandingPage({ onSignIn, onSignUp }) {
             <div className="glow green-glow"></div>
             <div className="glow orange-glow"></div>
             <div className="phone-mockup phone-load">
-              <img src="/iPhone 17 Load.svg" alt="Load Phase Interface" loading="lazy" />
+              <img src="/iPhone 17 Load.svg" alt="Load Phase Interface" width="250" height="511" loading="lazy" />
             </div>
             <div className="hero-animation-wrapper">
               <HeroAnimation />
             </div>
             <div className="phone-mockup phone-deload">
-              <img src="/iPhone 17 DeLoad.svg" alt="Deload Phase Interface" loading="lazy" />
+              <img src="/iPhone 17 DeLoad.svg" alt="Deload Phase Interface" width="250" height="511" loading="lazy" />
             </div>
           </div>
         </section>
@@ -222,12 +237,12 @@ export function LandingPage({ onSignIn, onSignUp }) {
         {/* The Burnout Crisis Section */}
         <section className="burnout-section">
           <div className="burnout-card">
-            <h3 className="burnout-subtitle">{t.burnout.subtitle}</h3>
-            <h2 className="burnout-title">
+            <h2 className="burnout-subtitle">{t.burnout.subtitle}</h2>
+            <h3 className="burnout-title">
               <a href="https://fortisfitness.ca/how-we-are-set-up-to-fail-by-the-gym-industry-the-plot-thickens/" target="_blank" rel="noopener noreferrer">
                 {t.burnout.title}
               </a>
-            </h2>
+            </h3>
             <p className="burnout-content">
               {t.burnout.content}
             </p>
@@ -239,7 +254,7 @@ export function LandingPage({ onSignIn, onSignUp }) {
           {t.features.map((feature, idx) => (
             <article key={idx} className="feature-card">
               <div className="feature-image">
-                <img src={feature.image} alt={feature.alt} loading="lazy" />
+                <img src={feature.image} alt={feature.alt} width={feature.width} height={feature.height} loading="lazy" />
               </div>
               <div className="feature-text">
                 <h3>{feature.title}</h3>
