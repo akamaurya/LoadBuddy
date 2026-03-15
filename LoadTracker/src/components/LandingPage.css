@@ -39,6 +39,36 @@
   font-size: 24px;
 }
 
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.lang-toggle-btn {
+  background: rgba(255, 255, 255, 0.05); /* subtle background */
+  border: 1px solid var(--lb-gray-border);
+  color: var(--lb-text-main);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lang-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.lang-toggle-btn:active {
+  transform: scale(0.95);
+}
+
 .nav-actions {
   display: flex;
   align-items: center;
@@ -465,6 +495,18 @@
   border-top: 1px solid var(--lb-gray-border);
 }
 
+
+/* ============================
+   Fade Transitions
+   ============================ */
+.fade-content {
+  transition: opacity 0.15s ease-in-out;
+  opacity: 1;
+}
+
+.fade-out {
+  opacity: 0;
+}
 
 /* ============================
    Desktop Overrides
