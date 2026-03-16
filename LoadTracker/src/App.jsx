@@ -223,6 +223,44 @@ function App() {
     return <div className="loading" style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading profile...</div>;
   }
 
+  // Calculate current week and cycle based on profile
+  let isDeload = false;
+  let daysUntilNextPhase = 0;
+
+  if (profile && profile.start_date) {
+    // Custom calculation calculation based on start_date
+    try {
+      const start = parseISO(profile.start_date);
+      const today = new Date();
+
+      // Normalize to dates
+      start.setHours(0, 0, 0, 0);
+      today.setHours(0, 0, 0, 0);
+
+      const daysSinceStart = differenceInDays(today, start);
+
+      const cycleLengthDays = profile.cycle_length_weeks * 7;
+      const loadLengthDays = (profile.cycle_length_weeks - profile.deload_length_weeks) * 7;
+
+      // Days into cycle to determine phase
+      if (daysSinceStart >= 0) {
+        const daysIntoCycle = daysSinceStart % cycleLengthDays;
+        isDeload = daysIntoCycle >= loadLengthDays;
+
+        if (isDeload) {
+          daysUntilNextPhase = cycleLengthDays - daysIntoCycle;
+        } else {
+          daysUntilNextPhase = loadLengthDays - daysIntoCycle;
+        }
+      } else {
+        isDeload = false; // Before start date
+        daysUntilNextPhase = Math.abs(daysSinceStart); // Days until it starts
+      }
+    } catch (e) {
+      console.error("Error calculating phase:", e);
+    }
+  }
+
   // Block 2: Are they a first time user? (Settings / Questionnaire)
   if (showSettings) {
     if (!profile) {
@@ -261,39 +299,6 @@ function App() {
   }
 
   // Block 4: Main Application View (Load/Deload)
-  // Calculate current week and cycle based on profile
-  let isDeload = false;
-  let daysUntilNextPhase = 0;
-
-  if (profile) {
-    // Custom calculation calculation based on start_date
-    const start = parseISO(profile.start_date);
-    const today = new Date();
-
-    // Normalize to dates
-    start.setHours(0, 0, 0, 0);
-    today.setHours(0, 0, 0, 0);
-
-    const daysSinceStart = differenceInDays(today, start);
-
-    const cycleLengthDays = profile.cycle_length_weeks * 7;
-    const loadLengthDays = (profile.cycle_length_weeks - profile.deload_length_weeks) * 7;
-
-    // Days into cycle to determine phase
-    if (daysSinceStart >= 0) {
-      const daysIntoCycle = daysSinceStart % cycleLengthDays;
-      isDeload = daysIntoCycle >= loadLengthDays;
-
-      if (isDeload) {
-        daysUntilNextPhase = cycleLengthDays - daysIntoCycle;
-      } else {
-        daysUntilNextPhase = loadLengthDays - daysIntoCycle;
-      }
-    } else {
-      isDeload = false; // Before start date
-      daysUntilNextPhase = Math.abs(daysSinceStart); // Days until it starts
-    }
-  }
 
   return (
     <div className={`app-container ${isDeload ? 'deload' : 'load'} auth-app-view`}>
