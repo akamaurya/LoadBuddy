@@ -7,6 +7,7 @@ import { Settings } from './components/Settings';
 import { OnboardingWizard } from './components/OnboardingWizard';
 import { LandingPage } from './components/LandingPage';
 import { PWAPrompt } from './components/PWAPrompt';
+import { ResetPassword } from './components/ResetPassword';
 import { shouldShowPWAPrompt } from './lib/pwaUtils'; // ADDED
 import './App.css';
 import { Analytics } from '@vercel/analytics/react';
@@ -21,6 +22,7 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [isInitializing, setIsInitializing] = useState(!!supabase);
   const [authView, setAuthView] = useState('landing'); // 'landing' or 'login'
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
 
   const [isPaused, setIsPaused] = useState(false);
   // Flow states
@@ -35,9 +37,13 @@ function App() {
       setIsInitializing(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
       setIsInitializing(false);
+      
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsPasswordRecovery(true);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -181,6 +187,15 @@ function App() {
       <div className="auth-container" style={{ padding: '2rem', maxWidth: '400px', margin: '0 auto', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>LoadTracker</h1>
         <p style={{ textAlign: 'center' }}>Loading...</p>
+      </div>
+    );
+  }
+
+  if (isPasswordRecovery) {
+    return (
+      <div className="auth-container" style={{ padding: '2rem', maxWidth: '400px', margin: '0 auto', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>LoadTracker</h1>
+        <ResetPassword onComplete={() => setIsPasswordRecovery(false)} />
       </div>
     );
   }

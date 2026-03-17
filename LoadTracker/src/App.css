@@ -281,6 +281,60 @@ body,
   cursor: not-allowed;
 }
 
+.login-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.login-divider::before {
+  margin-right: 0.5em;
+}
+
+.login-divider::after {
+  margin-left: 0.5em;
+}
+
+.google-login-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0.8rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: white;
+  color: #333;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.google-login-button:hover {
+  background: #f8f8f8;
+}
+
+.google-login-button:active {
+  transform: scale(0.98);
+}
+
+.google-login-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .form-error {
   background: rgba(255, 80, 80, 0.15);
   color: #ff6b6b;
@@ -668,4 +722,31 @@ body,
   font-size: clamp(0.875rem, 4vw, 1.5rem);
   line-height: 1.2;
   color: #FFFFFF;
+}
+
+.delete-account-btn {
+  background: rgba(220, 53, 69, 0.2);
+  color: #ff6b6b;
+  border: 1px solid rgba(220, 53, 69, 0.4);
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+
+.delete-account-btn:hover {
+  background: rgba(220, 53, 69, 0.4);
+  color: #fff;
+}
+
+.delete-account-btn:active {
+  transform: scale(0.97);
+}
+
+.delete-account-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

@@ -74,6 +74,25 @@ export function Settings({ session, profile, onProfileUpdated, onCancel, isDeloa
         }
     };
 
+    const handleDeleteAccount = async () => {
+        const confirm1 = window.confirm("Are you sure you want to delete your account? This action cannot be undone.");
+        if (!confirm1) return;
+        
+        const confirm2 = window.confirm("Final confirmation: Delete all data and account forever?");
+        if (!confirm2) return;
+
+        setLoading(true);
+        try {
+            const { error: rpcError } = await supabase.rpc('delete_user');
+            if (rpcError) throw rpcError;
+            
+            await supabase.auth.signOut();
+        } catch (error) {
+            alert("Error deleting account: " + error.message);
+            setLoading(false);
+        }
+    };
+
     // Ordinal suffix helper
     const getOrdinal = (n) => {
         const s = ['th', 'st', 'nd', 'rd'];
@@ -229,10 +248,22 @@ export function Settings({ session, profile, onProfileUpdated, onCancel, isDeloa
                                 <span>{loading ? 'Saving...' : 'Save'}</span>
                             </button>
                             {onCancel && (
-                                <button type="button" onClick={onCancel} className="settings-btn">
+                                <button type="button" onClick={onCancel} className="settings-btn" disabled={loading}>
                                     <span>Cancel</span>
                                 </button>
                             )}
+                        </div>
+
+                        {/* Danger Zone */}
+                        <div style={{ marginTop: '2rem', width: '100%', borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <button 
+                                type="button" 
+                                onClick={handleDeleteAccount} 
+                                disabled={loading}
+                                className="delete-account-btn"
+                            >
+                                Delete Account
+                            </button>
                         </div>
                     </form>
                 </div>
