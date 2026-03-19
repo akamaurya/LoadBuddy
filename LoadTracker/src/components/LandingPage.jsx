@@ -11,14 +11,14 @@ const content = {
     },
     hero: {
       title: <>Periodization<br />on autopilot</>,
-      subtitle: <>Stop guessing your recovery. LoadBuddy is a frictionless tracker that calculates exactly when you push your limits and when you need to recover.<br />Maximum hypertrophy, zero burnout.</>,
+      subtitle: <>Know exactly when to push hard and when to recover. LoadBuddy automates your training cycles so you build muscle without burning out.</>,
       getStarted: "Get Started - It's free",
       science: "View the Science"
     },
     burnout: {
       subtitle: "THE BURNOUT CRISIS",
       title: "93% of gym-goers quit within 90 days",
-      content: "It's not a lack of willpower. It's a biological failure to manage fatigue. When you train blindly, your central nervous system crashes. LoadBuddy mathematically enforces recovery before you hit the wall."
+      content: "Most people train blindly until fatigue catches up. LoadBuddy schedules your recovery automatically — so you never hit the wall."
     },
     features: [
       {
@@ -27,7 +27,7 @@ const content = {
         height: 261,
         alt: "Binary Focus: Load or Deload",
         title: "Binary Focus. Zero Bloat.",
-        desc: <>No spreadsheets. No complex logs. The entire screen is your biological signal. <span className="highlight-green">Green</span> means progressive overload. <span className="highlight-orange">Orange</span> means active recovery.</>
+        desc: <>One screen. Two states. <span className="highlight-green">Green</span> = push harder. <span className="highlight-orange">Orange</span> = recover. That's it.</>
       },
       {
         image: "/Frame 27 (1).png",
@@ -35,7 +35,7 @@ const content = {
         height: 235,
         alt: "Customize Cycle Length",
         title: "Your Body. Your Cycles.",
-        desc: "Not everyone fits a 4-week cycle. Customize your Load and Deload lengths to match your specific training block and physiology."
+        desc: "Set your own Load and Deload lengths to match how your body actually recovers."
       },
       {
         image: "/Frame 43.png",
@@ -43,7 +43,7 @@ const content = {
         height: 251,
         alt: "Pause Tasks Button",
         title: "Pause Anytime.",
-        desc: "Going on vacation? Sustained an injury? Pause your cycle with one tap and pick up exactly where you left off."
+        desc: "Vacation? Injury? Pause your cycle with one tap and resume right where you left off."
       },
       {
         image: "/Frame 30.png",
@@ -51,31 +51,31 @@ const content = {
         height: 259,
         alt: "Notification Preferences",
         title: "Automated Autoregulation.",
-        desc: "Never miss a transition. Set custom push notification days in advance so you are mentally and physically prepared to shift from Load to Deload."
+        desc: "Get notified before your cycle switches so you're always prepared — mentally and physically."
       }
     ],
     science: {
       subtitle: "The Science of the \"Sweet Spot\"",
       title: "Built on peer-reviewed exercise science",
-      description: "LoadBuddy isn't just a calendar; it's a structural defence against Overtraining Syndrome.",
+      description: "LoadBuddy isn't just a calendar — it's built on real exercise science to prevent overtraining.",
       points: [
         {
           dotClass: "green-dot",
           url: "https://bjsm.bmj.com/content/51/5/452",
           title: "The Acute Chronic Workload Ratio",
-          desc: "Keeping your training stress mathematically tethered to your rolling 28-day keeps you in the physiological \"Sweet Spot\" minimising soft-tissue injury risk."
+          desc: "Keep your training stress in the physiological \"sweet spot\" to minimise injury risk."
         },
         {
           dotClass: "orange-dot",
           url: "https://peerj.com/articles/16777/",
           title: "Active Deload vs Total Reset",
-          desc: "Taking a full week off causes neurological detraining. LoadBuddy enforces active deloading - cutting volume by 50% to drop inflammation while maintaining strength pathways."
+          desc: "Full weeks off cause detraining. LoadBuddy cuts volume by 50% instead — inflammation drops, strength stays."
         },
         {
           dotClass: "pink-dot",
           url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC11927186/",
           title: "Psychological Resilience",
-          desc: "By visualising your recovery phases, LoadBuddy removes the guilt of resting. It proves that recovery isn't \"quitting\" - it's a programmed phase of growth."
+          desc: "Seeing recovery as a scheduled phase removes the guilt of resting. Rest isn't quitting — it's part of growth."
         }
       ]
     },
