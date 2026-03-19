@@ -25,6 +25,7 @@ function App() {
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
 
   const [isPaused, setIsPaused] = useState(false);
+  const [notifBannerDismissed, setNotifBannerDismissed] = useState(false);
   // Flow states
   const [hasCompletedPwaPrompt, setHasCompletedPwaPrompt] = useState(!shouldShowPWAPrompt());
   const [isSubscribed, setIsSubscribed] = useState(true);
@@ -159,28 +160,7 @@ function App() {
     }
   };
 
-  const handleTestPush = async () => {
-    try {
-      const reg = await navigator.serviceWorker.ready;
-      if (reg) {
-        const title = isDeload ? "Deload next week" : "Load next week";
-        const message = isDeload
-          ? "Tomorrow starts your Deload week! Take it easy."
-          : "Tomorrow starts your Load week! Time to push.";
 
-        await reg.showNotification(title, {
-          body: message,
-          icon: "/pwa-192x192.png",
-          vibrate: [200, 100, 200]
-        });
-      } else {
-        alert("Service Worker not ready. Are you on iOS Home Screen?");
-      }
-    } catch (error) {
-      console.error("Local Push Error:", error);
-      alert("Error showing test push: " + error.message);
-    }
-  };
 
   if (isInitializing) {
     return (
@@ -329,17 +309,20 @@ function App() {
         )}
       </main>
 
+      {!isSubscribed && !notifBannerDismissed && (
+        <div className="notification-banner">
+          <div className="notification-banner-content">
+            <span className="notification-banner-icon">🔔</span>
+            <p className="notification-banner-text">Enable notifications to get reminders before your cycle changes</p>
+          </div>
+          <div className="notification-banner-actions">
+            <button className="notification-banner-btn" onClick={handleEnablePush}>Enable Notifications</button>
+            <button className="notification-banner-dismiss" onClick={() => setNotifBannerDismissed(true)}>Not now</button>
+          </div>
+        </div>
+      )}
+
       <div className="button-group">
-        {!isSubscribed && (
-          <button className="action-button" onClick={handleEnablePush}>
-            Enable Push
-          </button>
-        )}
-        {isSubscribed && (
-          <button className="action-button" onClick={handleTestPush}>
-            Test Push
-          </button>
-        )}
         <button className="action-button" onClick={togglePause}>
           {isPaused ? 'Resume' : 'Pause'} Tasks
         </button>
