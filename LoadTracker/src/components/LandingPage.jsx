@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './LandingPage.css';
 import HeroAnimation from './HeroAnimation';
+import { PWAPrompt } from './PWAPrompt';
+import { shouldShowPWAPrompt } from '../lib/pwaUtils';
 
 
 const content = {
@@ -171,6 +173,13 @@ const content = {
 export function LandingPage({ onSignIn, onSignUp }) {
   const [lang, setLang] = useState(() => localStorage.getItem('lb_lang') || 'en');
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [showPwaPrompt, setShowPwaPrompt] = useState(false);
+
+  useEffect(() => {
+    if (shouldShowPWAPrompt()) {
+      setShowPwaPrompt(true);
+    }
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('lb_lang', lang);
@@ -188,6 +197,7 @@ export function LandingPage({ onSignIn, onSignUp }) {
 
   return (
     <div className="landing-container">
+      {showPwaPrompt && <PWAPrompt onDismiss={() => setShowPwaPrompt(false)} />}
       {/* Navigation */}
       <nav className="landing-nav">
         <div className="nav-left">

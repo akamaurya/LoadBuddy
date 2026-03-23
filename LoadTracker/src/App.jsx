@@ -6,9 +6,7 @@ import { supabase } from './lib/supabase';
 import { Settings } from './components/Settings';
 import { OnboardingWizard } from './components/OnboardingWizard';
 import { LandingPage } from './components/LandingPage';
-import { PWAPrompt } from './components/PWAPrompt';
 import { ResetPassword } from './components/ResetPassword';
-import { shouldShowPWAPrompt } from './lib/pwaUtils'; // ADDED
 import './App.css';
 import { Analytics } from '@vercel/analytics/react';
 
@@ -26,8 +24,6 @@ function App() {
 
   const [isPaused, setIsPaused] = useState(false);
   const [notifBannerDismissed, setNotifBannerDismissed] = useState(false);
-  // Flow states
-  const [hasCompletedPwaPrompt, setHasCompletedPwaPrompt] = useState(!shouldShowPWAPrompt());
   const [isSubscribed, setIsSubscribed] = useState(true);
 
   useEffect(() => {
@@ -288,10 +284,7 @@ function App() {
     }
   }
 
-  // Block 3: Have they seen the PWA Prompt?
-  if (!hasCompletedPwaPrompt) {
-    return <PWAPrompt onContinue={() => setHasCompletedPwaPrompt(true)} />;
-  }
+
 
   // Block 4: Main Application View (Load/Deload)
 
