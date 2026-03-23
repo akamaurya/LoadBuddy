@@ -173,13 +173,7 @@ const content = {
 export function LandingPage({ onSignIn, onSignUp }) {
   const [lang, setLang] = useState(() => localStorage.getItem('lb_lang') || 'en');
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [showPwaPrompt, setShowPwaPrompt] = useState(false);
-
-  useEffect(() => {
-    if (shouldShowPWAPrompt()) {
-      setShowPwaPrompt(true);
-    }
-  }, []);
+  const [showPwaPrompt, setShowPwaPrompt] = useState(() => shouldShowPWAPrompt());
 
   useEffect(() => {
     localStorage.setItem('lb_lang', lang);

@@ -1,5 +1,6 @@
 export const isMobileBrowser = () => {
-  return window.innerWidth < 768 || /Mobi|Android/i.test(navigator.userAgent);
+  // Only use user agent — viewport width alone would false-positive on desktop narrow windows
+  return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 };
 
 export const isStandalone = () => {
