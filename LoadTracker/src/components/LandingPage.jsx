@@ -173,7 +173,17 @@ const content = {
 export function LandingPage({ onSignIn, onSignUp }) {
   const [lang, setLang] = useState(() => localStorage.getItem('lb_lang') || 'en');
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [showPwaPrompt, setShowPwaPrompt] = useState(() => shouldShowPWAPrompt());
+  const [showPwaPrompt, setShowPwaPrompt] = useState(false);
+
+  useEffect(() => {
+    // Small delay ensures hydration is complete and navigator is fully accessible
+    const timer = setTimeout(() => {
+      if (shouldShowPWAPrompt()) {
+        setShowPwaPrompt(true);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('lb_lang', lang);
