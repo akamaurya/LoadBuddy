@@ -2,29 +2,41 @@ import React, { useEffect, useState } from 'react';
 import { shouldShowPWAPrompt, getMobileOS, dismissPrompt } from '../lib/pwaUtils';
 import './PWAPrompt.css';
 
-export function PWAPrompt({ onDismiss }) {
+export function PWAPrompt() {
   const [os, setOs] = useState('unknown');
   const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    // Only show after a small delay to ensure hydration/navigator fully ready
+    const timer = setTimeout(() => {
+      if (shouldShowPWAPrompt()) {
+        setIsVisible(true);
+      }
+    }, 500);
+
     setOs(getMobileOS());
 
     // Capture the beforeinstallprompt event for Android
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
+      if (shouldShowPWAPrompt()) {
+        setIsVisible(true);
+      }
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
     return () => {
+      clearTimeout(timer);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
   }, []);
 
   const handleDismiss = () => {
     dismissPrompt();
-    if (onDismiss) onDismiss();
+    setIsVisible(false);
   };
 
   const handleInstallClick = async () => {
@@ -33,13 +45,15 @@ export function PWAPrompt({ onDismiss }) {
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === 'accepted') {
         dismissPrompt();
-        if (onDismiss) onDismiss();
+        setIsVisible(false);
       }
       setDeferredPrompt(null);
     } else if (os === 'iOS') {
       handleDismiss();
     }
   };
+
+  if (!isVisible) return null;
 
   return (
     <div className="pwa-overlay">

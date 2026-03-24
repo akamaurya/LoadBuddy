@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './LandingPage.css';
 import HeroAnimation from './HeroAnimation';
-import { PWAPrompt } from './PWAPrompt';
-import { shouldShowPWAPrompt } from '../lib/pwaUtils';
 
 
 const content = {
@@ -173,17 +171,6 @@ const content = {
 export function LandingPage({ onSignIn, onSignUp }) {
   const [lang, setLang] = useState(() => localStorage.getItem('lb_lang') || 'en');
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [showPwaPrompt, setShowPwaPrompt] = useState(false);
-
-  useEffect(() => {
-    // Small delay ensures hydration is complete and navigator is fully accessible
-    const timer = setTimeout(() => {
-      if (shouldShowPWAPrompt()) {
-        setShowPwaPrompt(true);
-      }
-    }, 500);
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
     localStorage.setItem('lb_lang', lang);
@@ -201,7 +188,6 @@ export function LandingPage({ onSignIn, onSignUp }) {
 
   return (
     <div className="landing-container">
-      {showPwaPrompt && <PWAPrompt onDismiss={() => setShowPwaPrompt(false)} />}
       {/* Navigation */}
       <nav className="landing-nav">
         <div className="nav-left">
