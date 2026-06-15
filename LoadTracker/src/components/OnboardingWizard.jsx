@@ -56,8 +56,24 @@ export function OnboardingWizard({ session, onComplete }) {
         notification_days_before: parseInt(formData.notification_days_before, 10),
       };
 
-      const { error } = await supabase.from('profiles').upsert(updates);
-      if (error) throw error;
+      // Retry logic for transient network errors (iOS Safari "Load failed")
+      const MAX_RETRIES = 2;
+      let lastError = null;
+      for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        try {
+          const { error } = await supabase.from('profiles').upsert(updates);
+          if (error) throw error;
+          lastError = null;
+          break;
+        } catch (err) {
+          lastError = err;
+          if (attempt < MAX_RETRIES) {
+            // Short delay before retry (300ms, then 800ms)
+            await new Promise(r => setTimeout(r, attempt === 0 ? 300 : 800));
+          }
+        }
+      }
+      if (lastError) throw lastError;
 
       // Move to success step
       setStep(4);
@@ -68,7 +84,8 @@ export function OnboardingWizard({ session, onComplete }) {
       }, 3500);
 
     } catch (error) {
-      alert("Error saving profile: " + error.message);
+      console.error("Profile save failed after retries:", error);
+      alert("Couldn't save — please check your connection and try again.");
       setLoading(false);
     }
   };
