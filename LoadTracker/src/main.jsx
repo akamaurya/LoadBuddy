@@ -2,10 +2,9 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 
-// Global error handler to catch silent crashes
+// Global error handler — log only, never destroy the DOM
 window.addEventListener('error', (e) => {
   console.error('GLOBAL ERROR:', e.message, e.filename, e.lineno);
-  document.getElementById('root').innerHTML = `<pre style="color:red;padding:2rem;">Error: ${e.message}\n${e.filename}:${e.lineno}</pre>`;
 });
 
 window.addEventListener('unhandledrejection', (e) => {
