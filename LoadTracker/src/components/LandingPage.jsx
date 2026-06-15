@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './LandingPage.css';
 import HeroAnimation from './HeroAnimation';
 
@@ -171,9 +171,29 @@ const content = {
 export function LandingPage({ onSignIn, onSignUp }) {
   const [lang, setLang] = useState(() => localStorage.getItem('lb_lang') || 'en');
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const mainRef = useRef(null);
 
   useEffect(() => {
     localStorage.setItem('lb_lang', lang);
+  }, [lang]);
+
+  // Scroll reveal observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' }
+    );
+
+    const revealElements = mainRef.current?.querySelectorAll('.reveal');
+    revealElements?.forEach(el => observer.observe(el));
+
+    return () => observer.disconnect();
   }, [lang]);
 
   const toggleLang = () => {
@@ -181,7 +201,7 @@ export function LandingPage({ onSignIn, onSignUp }) {
     setTimeout(() => {
       setLang(prevLang => prevLang === 'en' ? 'hi' : 'en');
       setIsTransitioning(false);
-    }, 150); // 150ms total transition time matching CSS
+    }, 150);
   };
 
   const t = content[lang];
@@ -206,7 +226,7 @@ export function LandingPage({ onSignIn, onSignUp }) {
         </div>
       </nav>
 
-      <main className={`landing-main fade-content ${isTransitioning ? 'fade-out' : ''}`}>
+      <main ref={mainRef} className={`landing-main fade-content ${isTransitioning ? 'fade-out' : ''}`}>
         {/* Hero Section */}
         <section className="hero-section">
           <h1 className="hero-title">{t.hero.title}</h1>
@@ -235,7 +255,7 @@ export function LandingPage({ onSignIn, onSignUp }) {
         </section>
 
         {/* The Burnout Crisis Section */}
-        <section className="burnout-section">
+        <section className="burnout-section reveal">
           <div className="burnout-card">
             <h2 className="burnout-subtitle">{t.burnout.subtitle}</h2>
             <h3 className="burnout-title">
@@ -252,7 +272,7 @@ export function LandingPage({ onSignIn, onSignUp }) {
         {/* Feature Grid Section */}
         <section className="features-grid">
           {t.features.map((feature, idx) => (
-            <article key={idx} className="feature-card">
+            <article key={idx} className="feature-card reveal" style={{ transitionDelay: `${idx * 80}ms` }}>
               <div className="feature-image">
                 <img src={feature.image} alt={feature.alt} width={feature.width} height={feature.height} loading="lazy" />
               </div>
@@ -265,7 +285,7 @@ export function LandingPage({ onSignIn, onSignUp }) {
         </section>
 
         {/* Science Section */}
-        <section id="science-section" className="science-section">
+        <section id="science-section" className="science-section reveal">
           <div className="science-header">
             <span className="science-subtitle">{t.science.subtitle}</span>
             <h2>{t.science.title}</h2>
@@ -292,13 +312,12 @@ export function LandingPage({ onSignIn, onSignUp }) {
         </section>
 
         {/* CTA Section */}
-        <section className="cta-section">
+        <section className="cta-section reveal">
           <div className="cta-card">
             <h2>{t.cta.title}</h2>
             <p>{t.cta.desc}</p>
             
             <div className="cta-form">
-              <input type="email" placeholder="Email Address" aria-label="Email Address" />
               <button className="create-btn" onClick={onSignUp}>{t.cta.createAccount}</button>
             </div>
           </div>
@@ -307,7 +326,13 @@ export function LandingPage({ onSignIn, onSignUp }) {
 
       {/* Footer */}
       <footer className="landing-footer">
-        <p>Github Repo | Terms | Privacy</p>
+        <p>
+          <a href="https://github.com/akamaurya/LoadBuddy" target="_blank" rel="noopener noreferrer">GitHub</a>
+          {' · '}
+          <span>Terms</span>
+          {' · '}
+          <span>Privacy</span>
+        </p>
       </footer>
     </div>
   );

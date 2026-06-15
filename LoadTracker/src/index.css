@@ -1,67 +1,168 @@
+/* =============================================
+   LoadBuddy — Design Tokens & Global Reset
+   Philosophy: Functionalist (Dieter Rams)
+   "As little design as possible"
+   ============================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  /* ---- Color Palette ---- */
+  --color-evergreen:     #0B1D0F;
+  --color-verdant:       #00D066;
+  --color-verdant-dim:   #009E4E;
+  --color-ember:         #E67E22;
+  --color-ember-dim:     #C0651A;
+  --color-bone:          #F5F2EC;
+  --color-graphite:      #1A1C1E;
+  --color-mist:          rgba(255, 255, 255, 0.55);
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* Semantic */
+  --color-bg-primary:    #070E09;
+  --color-bg-card:       #111613;
+  --color-bg-input:      rgba(255, 255, 255, 0.06);
+  --color-border:        #1E2D21;
+  --color-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-text-primary:  var(--color-bone);
+  --color-text-muted:    var(--color-mist);
+  --color-accent:        var(--color-verdant);
+  --color-accent-hover:  #00E874;
 
+  /* ---- Typography ---- */
+  --font-display:        'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-body:           'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-mono:           'DM Mono', 'SF Mono', 'Fira Code', monospace;
+
+  --fs-xs:               0.8125rem;   /* 13px */
+  --fs-sm:               0.9375rem;   /* 15px */
+  --fs-base:             1.0625rem;   /* 17px */
+  --fs-md:               1.25rem;     /* 20px */
+  --fs-lg:               1.75rem;     /* 28px */
+  --fs-xl:               2.5rem;      /* 40px */
+  --fs-2xl:              4rem;        /* 64px */
+
+  --fw-normal:           400;
+  --fw-medium:           500;
+  --fw-semibold:         600;
+  --fw-bold:             700;
+
+  --lh-tight:            1.15;
+  --lh-snug:             1.3;
+  --lh-normal:           1.5;
+  --lh-relaxed:          1.65;
+
+  --ls-tight:            -0.025em;
+  --ls-tighter:          -0.04em;
+  --ls-normal:           0;
+  --ls-wide:             0.05em;
+  --ls-wider:            0.1em;
+
+  /* ---- Spacing (8px base) ---- */
+  --space-1:             0.25rem;     /* 4px */
+  --space-2:             0.5rem;      /* 8px */
+  --space-3:             0.75rem;     /* 12px */
+  --space-4:             1rem;        /* 16px */
+  --space-5:             1.5rem;      /* 24px */
+  --space-6:             2rem;        /* 32px */
+  --space-7:             3rem;        /* 48px */
+  --space-8:             4rem;        /* 64px */
+  --space-9:             6rem;        /* 96px */
+
+  /* ---- Border Radius ---- */
+  --radius-sm:           8px;
+  --radius-md:           14px;
+  --radius-lg:           20px;
+  --radius-full:         999px;
+
+  /* ---- Motion ---- */
+  --duration-fast:       150ms;
+  --duration-normal:     200ms;
+  --duration-slow:       350ms;
+  --ease-default:        cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-out:            cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out:         cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ---- Shadows ---- */
+  --shadow-sm:           0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md:           0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg:           0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-glow-green:   0 0 40px rgba(0, 208, 102, 0.15);
+  --shadow-glow-orange:  0 0 40px rgba(230, 126, 34, 0.15);
+
+  /* Base rendering */
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+/* ---- Global Reset ---- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
-a:hover {
-  color: #535bf2;
+
+html {
+  min-height: 100%;
+  scroll-behavior: smooth;
 }
 
 body {
-  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-normal);
+  line-height: var(--lh-normal);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
   min-width: 320px;
   min-height: 100vh;
-  background-color: #020202; /* Match the landing page background */
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+#root {
+  min-height: 100vh;
+  width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  font-size: inherit;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  border: none;
+  background: none;
+  color: inherit;
+  padding: 0;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
+input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+img, svg {
+  display: block;
+  max-width: 100%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-tight);
+}
+
+/* ---- Reduced Motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
