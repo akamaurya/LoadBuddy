@@ -11,7 +11,7 @@ export default defineConfig({
       workbox: {
         importScripts: ['/OneSignalSDKWorker.js'],
       },
-      includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'mask-icon.svg'],
+      includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'apple-touch-icon-120x120.png', 'apple-touch-icon-152x152.png', 'apple-touch-icon-167x167.png', 'mask-icon.svg'],
       manifest: {
         name: 'LoadBuddy',
         short_name: 'LoadBuddy',
@@ -20,6 +20,11 @@ export default defineConfig({
         background_color: '#2ECC71',
         display: 'standalone',
         icons: [
+          {
+            src: 'apple-touch-icon.png',
+            sizes: '180x180',
+            type: 'image/png'
+          },
           {
             src: 'pwa-192x192.png',
             sizes: '192x192',
