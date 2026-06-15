@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { differenceInDays, parseISO, format } from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
 import OneSignal from 'react-onesignal';
 import { LoginForm } from './components/LoginForm';
 import { supabase } from './lib/supabase';
@@ -23,7 +24,9 @@ function App() {
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
 
   const [isPaused, setIsPaused] = useState(false);
-  const [notifBannerDismissed, setNotifBannerDismissed] = useState(false);
+  const [notifBannerDismissed, setNotifBannerDismissed] = useState(
+    () => localStorage.getItem('loadtracker_notif_dismissed') === 'true'
+  );
   const [isSubscribed, setIsSubscribed] = useState(true);
 
   useEffect(() => {
@@ -219,14 +222,14 @@ function App() {
   let daysUntilNextPhase = 0;
 
   if (profile && profile.start_date) {
-    // Custom calculation calculation based on start_date
+    // Custom calculation based on start_date and timezone
     try {
-      const start = parseISO(profile.start_date);
-      const today = new Date();
-
-      // Normalize to dates
-      start.setHours(0, 0, 0, 0);
-      today.setHours(0, 0, 0, 0);
+      const userTimeZone = profile.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const todayInUserTZ = toZonedTime(new Date(), userTimeZone);
+      const today = new Date(todayInUserTZ.getFullYear(), todayInUserTZ.getMonth(), todayInUserTZ.getDate());
+      
+      const [year, month, day] = profile.start_date.split('-');
+      const start = new Date(parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10));
 
       const daysSinceStart = differenceInDays(today, start);
 
@@ -310,7 +313,10 @@ function App() {
           </div>
           <div className="notification-banner-actions">
             <button className="notification-banner-btn" onClick={handleEnablePush}>Enable Notifications</button>
-            <button className="notification-banner-dismiss" onClick={() => setNotifBannerDismissed(true)}>Not now</button>
+            <button className="notification-banner-dismiss" onClick={() => {
+              setNotifBannerDismissed(true);
+              localStorage.setItem('loadtracker_notif_dismissed', 'true');
+            }}>Not now</button>
           </div>
         </div>
       )}

@@ -3,7 +3,7 @@ import { shouldShowPWAPrompt, getMobileOS, dismissPrompt } from '../lib/pwaUtils
 import './PWAPrompt.css';
 
 export function PWAPrompt() {
-  const [os, setOs] = useState('unknown');
+  const [os] = useState(() => getMobileOS());
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -15,7 +15,6 @@ export function PWAPrompt() {
       }
     }, 500);
 
-    setOs(getMobileOS());
 
     // Capture the beforeinstallprompt event for Android
     const handleBeforeInstallPrompt = (e) => {

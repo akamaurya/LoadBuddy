@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { format, addDays } from 'date-fns';
+import { format } from 'date-fns';
 import './OnboardingWizard.css';
 
 const TIMEZONE_OPTIONS = [
@@ -79,8 +79,9 @@ export function OnboardingWizard({ session, onComplete }) {
   const formatDisplayDate = (dateStr) => {
     if (!dateStr) return '';
     try {
-      const d = new Date(dateStr + 'T00:00:00');
-      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const [year, month, day] = dateStr.split('-');
+      const d = new Date(parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10));
+      return format(d, 'MMM d, yyyy');
     } catch {
       return dateStr;
     }
