@@ -8,6 +8,8 @@ import { Settings } from './components/Settings';
 import { OnboardingWizard } from './components/OnboardingWizard';
 import { LandingPage } from './components/LandingPage';
 import { ResetPassword } from './components/ResetPassword';
+import { TermsPage } from './components/TermsPage';
+import { PrivacyPage } from './components/PrivacyPage';
 import './App.css';
 import { Analytics } from '@vercel/analytics/react';
 
@@ -180,10 +182,33 @@ function App() {
   }
 
   if (!session) {
+    if (authView === 'terms') {
+      return (
+        <>
+          <TermsPage onBack={() => setAuthView('landing')} />
+          <Analytics />
+        </>
+      );
+    }
+
+    if (authView === 'privacy') {
+      return (
+        <>
+          <PrivacyPage onBack={() => setAuthView('landing')} />
+          <Analytics />
+        </>
+      );
+    }
+
     if (authView === 'landing') {
       return (
         <>
-          <LandingPage onSignIn={() => setAuthView('login')} onSignUp={() => setAuthView('login')} />
+          <LandingPage
+            onSignIn={() => setAuthView('login')}
+            onSignUp={() => setAuthView('login')}
+            onTerms={() => setAuthView('terms')}
+            onPrivacy={() => setAuthView('privacy')}
+          />
           <Analytics />
         </>
       );

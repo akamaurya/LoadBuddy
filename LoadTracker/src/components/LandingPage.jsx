@@ -168,7 +168,7 @@ const content = {
   }
 };
 
-export function LandingPage({ onSignIn, onSignUp }) {
+export function LandingPage({ onSignIn, onSignUp, onTerms, onPrivacy }) {
   const [lang, setLang] = useState(() => localStorage.getItem('lb_lang') || 'en');
   const [isTransitioning, setIsTransitioning] = useState(false);
   const mainRef = useRef(null);
@@ -329,9 +329,9 @@ export function LandingPage({ onSignIn, onSignUp }) {
         <p>
           <a href="https://github.com/akamaurya/LoadBuddy" target="_blank" rel="noopener noreferrer">GitHub</a>
           {' · '}
-          <span>Terms</span>
+          <a href="#terms" onClick={(e) => { e.preventDefault(); onTerms(); }}>Terms</a>
           {' · '}
-          <span>Privacy</span>
+          <a href="#privacy" onClick={(e) => { e.preventDefault(); onPrivacy(); }}>Privacy</a>
         </p>
       </footer>
     </div>
