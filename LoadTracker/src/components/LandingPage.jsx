@@ -10,8 +10,8 @@ const content = {
       createAccount: "Create Account"
     },
     hero: {
-      title: <>Periodization<br />on autopilot</>,
-      subtitle: <>Know exactly when to push hard and when to recover. LoadBuddy automates your training cycles so you build muscle without burning out.</>,
+      title: <>Know when to push.<br />Know when to recover.</>,
+      subtitle: <>LoadBuddy automates your load and deload weeks and warns you the day before every switch, so you build muscle without burning out.</>,
       getStarted: "Get Started - It's free",
       science: "View the Science"
     },
@@ -91,7 +91,7 @@ const content = {
       createAccount: "Account Banao"
     },
     hero: {
-      title: <>Periodization?<br />Autopilot hai na</>,
+      title: <>Push kab, rest kab.<br />Ab guess nahi.</>,
       subtitle: <>Recovery guess karna chhod yaar. LoadBuddy sab calculate kar leta hai — kab push karna hai, kab rest.<br />Maximum gains, zero burnout. W app.</>,
       getStarted: "Shuru Kar — Free hai bhai",
       science: "Science dekh"
