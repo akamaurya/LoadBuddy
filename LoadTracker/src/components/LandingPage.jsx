@@ -17,7 +17,7 @@ const content = {
     },
     burnout: {
       subtitle: "THE BURNOUT CRISIS",
-      title: "93% of gym-goers quit within 90 days",
+      title: "Half of new lifters quit within 6 months",
       content: "Most people train blindly until fatigue catches up. LoadBuddy schedules your recovery automatically — so you never hit the wall."
     },
     features: [
@@ -98,7 +98,7 @@ const content = {
     },
     burnout: {
       subtitle: "BURNOUT KA BT",
-      title: "93% gym-goers 90 din mein hi ghost kar dete hain",
+      title: "Aadhe naye lifters 6 mahine mein gym chhod dete hain",
       content: "Willpower ki kami nahi hai bhai. Fatigue manage karna nahi aata — wahi real villain hai. Blindly train karte ho toh CNS literally crash kar jaata hai. LoadBuddy mathematically recovery enforce karta hai — wall se pehle."
     },
     features: [
