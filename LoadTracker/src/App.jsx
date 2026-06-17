@@ -1,17 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { differenceInDays, parseISO, format } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import OneSignal from 'react-onesignal';
-import { LoginForm } from './components/LoginForm';
 import { supabase } from './lib/supabase';
-import { Settings } from './components/Settings';
-import { OnboardingWizard } from './components/OnboardingWizard';
 import { LandingPage } from './components/LandingPage';
-import { ResetPassword } from './components/ResetPassword';
 import { TermsPage } from './components/TermsPage';
 import { PrivacyPage } from './components/PrivacyPage';
 import './App.css';
 import { Analytics } from '@vercel/analytics/react';
+
+// Lazy-load auth-gated components — landing page visitors never need these
+const LoginForm = lazy(() => import('./components/LoginForm').then(m => ({ default: m.LoginForm })));
+const Settings = lazy(() => import('./components/Settings').then(m => ({ default: m.Settings })));
+const OnboardingWizard = lazy(() => import('./components/OnboardingWizard').then(m => ({ default: m.OnboardingWizard })));
+const ResetPassword = lazy(() => import('./components/ResetPassword').then(m => ({ default: m.ResetPassword })));
 
 const ONESIGNAL_APP_ID = import.meta.env.VITE_ONESIGNAL_APP_ID || "YOUR_ONESIGNAL_APP_ID";
 let isOneSignalInitialized = false;
@@ -176,7 +178,9 @@ function App() {
     return (
       <div className="auth-container" style={{ padding: '2rem', maxWidth: '400px', margin: '0 auto', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>LoadTracker</h1>
-        <ResetPassword onComplete={() => setIsPasswordRecovery(false)} />
+        <Suspense fallback={<p style={{ textAlign: 'center' }}>Loading...</p>}>
+          <ResetPassword onComplete={() => setIsPasswordRecovery(false)} />
+        </Suspense>
       </div>
     );
   }
@@ -225,7 +229,9 @@ function App() {
             >
               ← Back
             </button>
-            <LoginForm />
+            <Suspense fallback={<p style={{ textAlign: 'center' }}>Loading...</p>}>
+              <LoginForm />
+            </Suspense>
           </div>
         ) : (
           <p style={{ textAlign: 'center', color: '#ff6b6b' }}>
@@ -285,28 +291,32 @@ function App() {
     if (!profile) {
       // First Time User
       return (
-        <OnboardingWizard 
-          session={session} 
-          onComplete={(newProfile) => {
-            setProfile(newProfile);
-            setShowSettings(false);
-          }}
-        />
+        <Suspense fallback={<div className="loading" style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>}>
+          <OnboardingWizard 
+            session={session} 
+            onComplete={(newProfile) => {
+              setProfile(newProfile);
+              setShowSettings(false);
+            }}
+          />
+        </Suspense>
       );
     } else {
       // Returning user wanting to access Settings dashboard
       return (
         <div className="auth-app-view">
-          <Settings
-            session={session}
-            profile={profile}
-            isDeload={isDeload}
-            onProfileUpdated={(updatedProfile) => {
-              setProfile(updatedProfile);
-              setShowSettings(false); // Move to next step in flow
-            }}
-            onCancel={profile ? () => setShowSettings(false) : undefined}
-          />
+          <Suspense fallback={<div className="loading" style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>}>
+            <Settings
+              session={session}
+              profile={profile}
+              isDeload={isDeload}
+              onProfileUpdated={(updatedProfile) => {
+                setProfile(updatedProfile);
+                setShowSettings(false); // Move to next step in flow
+              }}
+              onCancel={profile ? () => setShowSettings(false) : undefined}
+            />
+          </Suspense>
         </div>
       );
     }
