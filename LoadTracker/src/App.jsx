@@ -18,6 +18,8 @@ const ResetPassword = lazy(() => import('./components/ResetPassword').then(m => 
 const ONESIGNAL_APP_ID = import.meta.env.VITE_ONESIGNAL_APP_ID || "YOUR_ONESIGNAL_APP_ID";
 let isOneSignalInitialized = false;
 
+const authContainerStyle = { padding: '2rem', maxWidth: '400px', margin: '0 auto', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' };
+
 function App() {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
@@ -167,7 +169,7 @@ function App() {
 
   if (isInitializing) {
     return (
-      <div className="auth-container" style={{ padding: '2rem', maxWidth: '400px', margin: '0 auto', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+      <div className="auth-container" style={authContainerStyle}>
         <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>LoadTracker</h1>
         <p style={{ textAlign: 'center' }}>Loading...</p>
       </div>
@@ -176,7 +178,7 @@ function App() {
 
   if (isPasswordRecovery) {
     return (
-      <div className="auth-container" style={{ padding: '2rem', maxWidth: '400px', margin: '0 auto', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+      <div className="auth-container" style={authContainerStyle}>
         <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>LoadTracker</h1>
         <Suspense fallback={<p style={{ textAlign: 'center' }}>Loading...</p>}>
           <ResetPassword onComplete={() => setIsPasswordRecovery(false)} />
@@ -219,7 +221,7 @@ function App() {
     }
 
     return (
-      <div className="auth-container" style={{ padding: '2rem', maxWidth: '400px', margin: '0 auto', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+      <div className="auth-container" style={authContainerStyle}>
         <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>LoadTracker</h1>
         {supabase ? (
           <div>

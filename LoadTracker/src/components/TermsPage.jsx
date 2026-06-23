@@ -1,4 +1,3 @@
-import React from 'react';
 import './LegalPage.css';
 
 export function TermsPage({ onBack }) {

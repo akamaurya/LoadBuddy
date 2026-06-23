@@ -1,9 +1,9 @@
-export const isMobileBrowser = () => {
+const isMobileBrowser = () => {
   // Only use user agent — viewport width alone would false-positive on desktop narrow windows
   return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 };
 
-export const isStandalone = () => {
+const isStandalone = () => {
   // iOS Safari check
   if ('standalone' in window.navigator && window.navigator.standalone) {
     return true;
@@ -15,7 +15,7 @@ export const isStandalone = () => {
   return false;
 };
 
-export const isPromptDismissed = () => {
+const isPromptDismissed = () => {
   return localStorage.getItem('pwa_prompt_dismissed') === 'true';
 };
 

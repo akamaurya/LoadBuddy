@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 const svgContent = `
 <svg id="S" viewBox="0 0 780 440" style="width:100%;height:100%;display:block;">
