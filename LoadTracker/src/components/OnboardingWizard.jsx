@@ -1,26 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { format } from 'date-fns';
+import { detectTimezone } from '../lib/timezones';
 import './OnboardingWizard.css';
-
-const TIMEZONE_OPTIONS = [
-  { label: 'US Pacific', value: 'America/Los_Angeles' },
-  { label: 'US Mountain', value: 'America/Denver' },
-  { label: 'US Central', value: 'America/Chicago' },
-  { label: 'US Eastern', value: 'America/New_York' },
-  { label: 'UK / GMT', value: 'Europe/London' },
-  { label: 'Central Europe', value: 'Europe/Berlin' },
-  { label: 'India (IST)', value: 'Asia/Kolkata' },
-  { label: 'Japan (JST)', value: 'Asia/Tokyo' },
-  { label: 'Australia East', value: 'Australia/Sydney' },
-];
-
-function detectTimezone() {
-  const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  if (detected === 'Asia/Calcutta') return 'Asia/Kolkata';
-  const match = TIMEZONE_OPTIONS.find(tz => tz.value === detected);
-  return match ? detected : 'America/New_York';
-}
 
 export function OnboardingWizard({ session, onComplete }) {
   const [step, setStep] = useState(1);
