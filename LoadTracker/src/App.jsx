@@ -3,6 +3,7 @@ import { differenceInDays, parseISO, format } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import OneSignal from 'react-onesignal';
 import { supabase } from './lib/supabase';
+import { phaseFor } from '../supabase/functions/_shared/phase.ts';
 import { LandingPage } from './components/LandingPage';
 import { TermsPage } from './components/TermsPage';
 import { PrivacyPage } from './components/PrivacyPage';
@@ -266,23 +267,8 @@ function App() {
 
       const daysSinceStart = differenceInDays(today, start);
 
-      const cycleLengthDays = profile.cycle_length_weeks * 7;
-      const loadLengthDays = (profile.cycle_length_weeks - profile.deload_length_weeks) * 7;
-
-      // Days into cycle to determine phase
-      if (daysSinceStart >= 0) {
-        const daysIntoCycle = daysSinceStart % cycleLengthDays;
-        isDeload = daysIntoCycle >= loadLengthDays;
-
-        if (isDeload) {
-          daysUntilNextPhase = cycleLengthDays - daysIntoCycle;
-        } else {
-          daysUntilNextPhase = loadLengthDays - daysIntoCycle;
-        }
-      } else {
-        isDeload = false; // Before start date
-        daysUntilNextPhase = Math.abs(daysSinceStart); // Days until it starts
-      }
+      ({ isDeload, daysUntilNextPhase } = phaseFor(
+        daysSinceStart, profile.cycle_length_weeks, profile.deload_length_weeks));
     } catch (e) {
       console.error("Error calculating phase:", e);
     }

@@ -1,6 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.39.3";
 import { differenceInDays, parseISO, addDays } from "npm:date-fns@3.3.1";
 import { formatInTimeZone } from "npm:date-fns-tz@3.1.3";
+import { phaseFor } from "../_shared/phase.ts";
 
 const onesignalAppId = Deno.env.get("ONESIGNAL_APP_ID") || "";
 const onesignalRestApiKey = Deno.env.get("ONESIGNAL_REST_API_KEY") || "";
@@ -24,8 +25,8 @@ Deno.serve(async (req) => {
         const { data: profiles, error } = await supabase.from('profiles').select('*');
         if (error) throw error;
 
-        const loadUsers: string[] = [];
-        const deloadUsers: string[] = [];
+        // Bucket users by phase + days-ahead so each push states the right lead time.
+        const buckets = new Map<string, string[]>(); // key: `${isDeload ? 1 : 0}:${daysAhead}`
 
         const nowUTC = new Date();
 
@@ -50,25 +51,23 @@ Deno.serve(async (req) => {
 
                     const daysSinceStart = differenceInDays(tzFutureDate, start);
 
-                    let isDeload = false;
-                    if (daysSinceStart >= 0) {
-                        const weeksSinceStart = Math.floor(daysSinceStart / 7);
-                        const cycleProgress = weeksSinceStart % profile.cycle_length_weeks;
-                        isDeload = cycleProgress >= (profile.cycle_length_weeks - profile.deload_length_weeks);
-                    }
+                    const { isDeload, isPhaseStart } = phaseFor(
+                        daysSinceStart, profile.cycle_length_weeks, profile.deload_length_weeks);
 
-                    if (isDeload) {
-                        deloadUsers.push(String(profile.id));
-                    } else {
-                        loadUsers.push(String(profile.id));
-                    }
+                    // Only notify when the look-ahead day is the first day of a new phase.
+                    if (!isPhaseStart) continue;
+
+                    const key = `${isDeload ? 1 : 0}:${daysAhead}`;
+                    const bucket = buckets.get(key) ?? [];
+                    bucket.push(String(profile.id));
+                    buckets.set(key, bucket);
                 }
             } catch (err) {
                 console.error("Error processing profile", profile.id, err);
             }
         }
 
-        if (loadUsers.length === 0 && deloadUsers.length === 0) {
+        if (buckets.size === 0) {
             return new Response(JSON.stringify({ status: "No notifications to send this hour." }), { headers: { "Content-Type": "application/json" } });
         }
 
@@ -95,15 +94,25 @@ Deno.serve(async (req) => {
             }
         };
 
-        await Promise.all([
-            sendPush(loadUsers, "Load next week", "Tomorrow starts your Load week! Time to push."),
-            sendPush(deloadUsers, "Deload next week", "Tomorrow starts your Deload week! Take it easy.")
-        ]);
+        let sentLoad = 0, sentDeload = 0;
+        const sends = [];
+        for (const [key, userIds] of buckets) {
+            const [d, n] = key.split(':');
+            const isDeload = d === '1';
+            const daysAhead = parseInt(n, 10);
+            const phase = isDeload ? "Deload" : "Load";
+            const when = daysAhead === 1 ? "Tomorrow" : `In ${daysAhead} days`;
+            const tail = isDeload ? "Take it easy." : "Time to push.";
+            const title = `${phase} week ${daysAhead === 1 ? "tomorrow" : `in ${daysAhead} days`}`;
+            sends.push(sendPush(userIds, title, `${when}, your ${phase} week begins! ${tail}`));
+            if (isDeload) sentDeload += userIds.length; else sentLoad += userIds.length;
+        }
+        await Promise.all(sends);
 
         return new Response(JSON.stringify({
             status: "Success",
-            sentLoad: loadUsers.length,
-            sentDeload: deloadUsers.length
+            sentLoad,
+            sentDeload
         }), { headers: { "Content-Type": "application/json" } });
 
     } catch (error: any) {
