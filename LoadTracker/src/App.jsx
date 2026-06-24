@@ -318,6 +318,11 @@ function App() {
     <div className={`app-container ${isDeload ? 'deload' : 'load'} auth-app-view`}>
       <main className="content">
         <h1>{isDeload ? 'DELOAD' : 'LOAD'}</h1>
+        <p className="prescription-line">
+          {isDeload
+            ? 'Cut volume ~50% — keep intensity, stop short of failure'
+            : 'Push volume — add a set or load where you can'}
+        </p>
         {profile && !showSettings && (
           <div className="status-info">
             <h2 className="next-phase">Next {isDeload ? 'LOAD' : 'DELOAD'} is in {daysUntilNextPhase} {daysUntilNextPhase === 1 ? 'Day' : 'Days'}</h2>
