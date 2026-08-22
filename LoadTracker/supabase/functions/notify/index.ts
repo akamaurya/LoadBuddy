@@ -10,6 +10,19 @@ const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+interface Profile {
+    id: string;
+    timezone: string | null;
+    start_date: string | null;
+    cycle_length_weeks: number;
+    deload_length_weeks: number;
+    notification_hour: number | null;
+    notification_days_before: number | null;
+}
+
+const PROFILE_COLUMNS =
+    "id, timezone, start_date, cycle_length_weeks, deload_length_weeks, notification_hour, notification_days_before";
+
 Deno.serve(async (req) => {
     try {
         // --- Auth guard: only allow requests with a valid CRON_SECRET ---
@@ -22,8 +35,23 @@ Deno.serve(async (req) => {
             });
         }
 
-        const { data: profiles, error } = await supabase.from('profiles').select('*');
-        if (error) throw error;
+        // PostgREST caps a response at max_rows (1000 by default), so page
+        // through rather than silently dropping every user past the first page.
+        const PAGE_SIZE = 1000;
+        const profiles: Profile[] = [];
+        for (let from = 0; ; from += PAGE_SIZE) {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select(PROFILE_COLUMNS)
+                .eq('paused', false) // paused users opted out of reminders
+                .order('id')
+                .range(from, from + PAGE_SIZE - 1)
+                .returns<Profile[]>();
+            if (error) throw error;
+            if (!data?.length) break;
+            profiles.push(...data);
+            if (data.length < PAGE_SIZE) break;
+        }
 
         // Bucket users by phase + days-ahead so each push states the right lead time.
         const buckets = new Map<string, string[]>(); // key: `${isDeload ? 1 : 0}:${daysAhead}`
@@ -31,7 +59,7 @@ Deno.serve(async (req) => {
         const nowUTC = new Date();
 
         for (const profile of profiles) {
-            if (!profile.timezone || profile.notification_hour == null) continue;
+            if (!profile.timezone || !profile.start_date || profile.notification_hour == null) continue;
 
             try {
                 const currentHourLocalStr = formatInTimeZone(nowUTC, profile.timezone, 'H');
@@ -71,8 +99,10 @@ Deno.serve(async (req) => {
             return new Response(JSON.stringify({ status: "No notifications to send this hour." }), { headers: { "Content-Type": "application/json" } });
         }
 
-        const sendPush = async (userIds: string[], title: string, message: string) => {
-            if (userIds.length === 0) return;
+        // Returns how many users were actually notified, so the response body
+        // reports deliveries rather than attempts.
+        const sendPush = async (userIds: string[], title: string, message: string): Promise<number> => {
+            if (userIds.length === 0) return 0;
 
             const res = await fetch("https://onesignal.com/api/v1/notifications", {
                 method: "POST",
@@ -91,23 +121,26 @@ Deno.serve(async (req) => {
 
             if (!res.ok) {
                 console.error("OneSignal error text:", await res.text());
+                return 0;
             }
+            return userIds.length;
         };
 
-        let sentLoad = 0, sentDeload = 0;
-        const sends = [];
-        for (const [key, userIds] of buckets) {
+        const sends = [...buckets].map(async ([key, userIds]) => {
             const [d, n] = key.split(':');
             const isDeload = d === '1';
             const daysAhead = parseInt(n, 10);
             const phase = isDeload ? "Deload" : "Load";
-            const when = daysAhead === 1 ? "Tomorrow" : `In ${daysAhead} days`;
+            const lead = daysAhead === 1 ? "tomorrow" : `in ${daysAhead} days`;
             const tail = isDeload ? "Take it easy." : "Time to push.";
-            const title = `${phase} week ${daysAhead === 1 ? "tomorrow" : `in ${daysAhead} days`}`;
-            sends.push(sendPush(userIds, title, `${when}, your ${phase} week begins! ${tail}`));
-            if (isDeload) sentDeload += userIds.length; else sentLoad += userIds.length;
-        }
-        await Promise.all(sends);
+            const when = lead.charAt(0).toUpperCase() + lead.slice(1);
+            const sent = await sendPush(userIds, `${phase} week ${lead}`, `${when}, your ${phase} week begins! ${tail}`);
+            return { isDeload, sent };
+        });
+
+        const results = await Promise.all(sends);
+        const sentLoad = results.filter(r => !r.isDeload).reduce((n, r) => n + r.sent, 0);
+        const sentDeload = results.filter(r => r.isDeload).reduce((n, r) => n + r.sent, 0);
 
         return new Response(JSON.stringify({
             status: "Success",
