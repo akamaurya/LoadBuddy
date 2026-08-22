@@ -1,77 +1,161 @@
-# LoadBuddy 🏋️‍♂️
+<h1 align="center">LoadBuddy</h1>
 
-A hyper-minimalist, iOS-optimized Progressive Web App (PWA) that does one thing well: tell you whether you're in a **Load** or **Deload** training week, and warn you the day(s) before your phase changes.
+<p align="center">
+  A training app that answers one question: <strong>should I push today, or recover?</strong>
+</p>
 
-No bloated workout logs, no social feeds — just a solid green screen for Load, a solid orange screen for Deload, a one-line prescription for what to do, and a push notification ahead of every switch.
+<p align="center">
+  <a href="https://loadbuddy.vercel.app"><strong>Live app →</strong></a>
+  &nbsp;·&nbsp;
+  <a href="#the-phase-math">How the math works</a>
+  &nbsp;·&nbsp;
+  <a href="#running-it-yourself">Run it yourself</a>
+</p>
 
-> The app code lives under the `LoadTracker/` directory (its original name); the product is now branded **LoadBuddy**.
+<p align="center">
+  <img src="LoadTracker/public/iPhone%2017%20Load.png" alt="LoadBuddy in its Load state" width="220" />
+  &nbsp;&nbsp;
+  <img src="LoadTracker/public/iPhone%2017%20DeLoad.png" alt="LoadBuddy in its Deload state" width="220" />
+</p>
+
+---
+
+Progressive overload only works if you periodically back off. Most lifters know this
+and still skip deloads, because tracking them means remembering which week of which
+cycle you're in. LoadBuddy removes the remembering: the whole screen turns green when
+you should push and orange when you should recover, and a push notification lands a few
+days before every switch.
+
+No workout logs, no social feed, no streaks. One screen, two states.
 
 ## Features
 
-* **Zero-Friction UI:** The entire screen *is* the interface. Green = Load, Orange = Deload, with a short prescription line telling you whether to push volume or back off.
-* **Your Body, Your Cycles:** Cycles are fully customizable per user — set your **start date**, **cycle length** (e.g. 4 weeks), and **deload length** (e.g. 1 week). The last N weeks of every cycle are deload; everything before is load. No more fixed "week 4 = deload" assumption.
-* **Timezone-Aware:** Phase calculations and notifications respect each user's timezone (auto-detected during onboarding).
-* **Smart Push Notifications:** Get a reminder a configurable number of **days before** each phase change, delivered at a configurable **hour** in your local time. The notification states the correct lead time ("Tomorrow…" vs "In 3 days…").
-* **Accounts & Sync:** Email/password and **Google OAuth** sign-in via Supabase, with password reset and account deletion. Your cycle settings follow you across devices.
-* **Guided Onboarding:** A short multi-step wizard captures your training block and notification preferences on first sign-in.
-* **Bilingual Landing Page:** Marketing landing page with an English ⇄ Hinglish language toggle.
-* **Pause Toggle:** Pause/resume notifications at any time.
-* **Installable PWA:** "Add to Home Screen" prompt and Apple touch icons for an app-like iOS experience (required for iOS web push).
+- **The screen is the interface.** Green = Load, orange = Deload, plus one line telling
+  you what that means for today's session.
+- **Cycles you define.** Set a start date, a cycle length, and how many trailing weeks
+  are deload. A 4/1 block and a 6/2 block are both just numbers — nothing is hardcoded.
+- **Notifications with the right lead time.** Choose how many days ahead you want warning
+  and at what local hour. The push states the actual timing ("tomorrow" vs "in 3 days").
+- **Timezone-aware throughout.** Phase boundaries and send times are computed in the
+  user's own zone, not the server's.
+- **Accounts that sync.** Email/password and Google OAuth via Supabase, with password
+  reset and self-serve account deletion.
+- **Pause when life happens.** Injury or holiday — pause reminders and resume in place.
+- **Installable PWA.** Add to Home Screen, which is also what iOS requires before it will
+  grant web-push permission.
+- **Bilingual landing page.** English ⇄ Hinglish toggle.
 
 ## Architecture
 
 | Layer | Technology |
 | --- | --- |
 | Frontend | React 19 + Vite 7 |
-| Auth & Database | Supabase (Postgres + Auth, Google OAuth) |
-| Push Notifications | OneSignal Web SDK |
-| Scheduling / Backend | Supabase Edge Function (Deno), run hourly |
-| Date Logic | `date-fns` + `date-fns-tz` |
-| PWA | `vite-plugin-pwa` (manifest + service worker) |
+| Auth & database | Supabase (Postgres + Auth, Google OAuth) |
+| Push delivery | OneSignal Web SDK |
+| Scheduler | Supabase Edge Function (Deno), invoked hourly |
+| Date logic | `date-fns` + `date-fns-tz` |
+| PWA | `vite-plugin-pwa` |
 | Analytics | Vercel Analytics + Microsoft Clarity |
-| Hosting | Vercel (frontend) + Supabase (edge functions) |
+| Hosting | Vercel (frontend), Supabase (edge function) |
 
-The load/deload phase math lives in a single shared, dependency-free module — `supabase/functions/_shared/phase.ts` — imported by **both** the React app and the notify edge function, so the screen and the notifications can never disagree.
+```
+LoadTracker/                       # the app (directory keeps the project's original name)
+├── src/
+│   ├── App.jsx                    # session/profile state and the Load/Deload screen
+│   ├── components/                # landing page, auth, onboarding, settings, legal
+│   └── lib/
+│       ├── cycle.js               # shared form defaults, bounds, and profile mapping
+│       ├── supabase.js
+│       └── timezones.js
+├── supabase/
+│   ├── migrations/                # schema, RLS policies, delete_user()
+│   └── functions/
+│       ├── _shared/phase.ts       # the phase math — imported by app AND function
+│       └── notify/index.ts        # hourly cron target
+└── tests/                         # Playwright smoke test for the landing page
+```
+
+### One source of truth for the math
+
+The load/deload calculation lives in `supabase/functions/_shared/phase.ts` and is
+imported by *both* the React app and the Deno edge function. It is pure and
+dependency-free specifically so the same file runs unchanged under Vite and Deno.
+
+That matters because the failure mode here is silent: if the screen and the notifier
+each had their own copy of the formula, a user could be told "deload starts tomorrow"
+and then open the app to a green screen. Sharing the module makes that disagreement
+impossible rather than merely unlikely.
 
 ### The `profiles` table
 
-Each authenticated user has one row in `profiles`:
+One row per authenticated user, protected by row-level security so a user can only
+reach their own row. The edge function reads the table with the service role key.
 
 | Column | Meaning |
 | --- | --- |
-| `id` | Supabase auth user id (PK) |
+| `id` | Supabase auth user id (PK, cascades from `auth.users`) |
 | `email` | User email |
 | `start_date` | First day of the training block (`YYYY-MM-DD`) |
 | `cycle_length_weeks` | Total weeks per cycle |
 | `deload_length_weeks` | Trailing weeks of each cycle that are deload |
-| `timezone` | IANA timezone (e.g. `America/New_York`) |
+| `timezone` | IANA timezone, e.g. `America/New_York` |
 | `notification_hour` | Local hour (0–23) to send reminders |
-| `notification_days_before` | How many days before a phase change to notify |
+| `notification_days_before` | Days of warning before a phase change |
+| `paused` | When true, the notifier skips this user |
 
----
+## The phase math
 
-## Prerequisites
+Phases are derived from *days since the start date*, never from ISO week numbers, so
+any cycle length works and cycles repeat indefinitely without bookkeeping:
 
-1. **Node.js** v18+ recommended.
-2. A **Supabase** project (free tier is fine) — provides auth, the `profiles` table, and edge function hosting.
-3. A **OneSignal** account (free tier) — provides web push.
-4. A **Vercel** account (for hosting the frontend).
+```ts
+phaseFor(daysSinceStart, cycleWeeks, deloadWeeks)
+// → { isDeload, daysIntoCycle, daysUntilNextPhase, isPhaseStart }
+```
 
----
+- A cycle is `cycleWeeks * 7` days.
+- The first `(cycleWeeks - deloadWeeks) * 7` days are **Load**; the remainder is **Deload**.
+- `isPhaseStart` is true only on the first day of a block — that's the notifier's trigger.
 
-## Setup & Installation
+With a 4-week cycle and a 1-week deload: weeks 1–3 load, week 4 deload, repeating from
+the start date. A future start date counts down instead of computing a phase.
 
-### 1. Clone and install
+## The notification function
+
+`supabase/functions/notify/index.ts` is designed to run **once per hour**. Each run it:
+
+1. Rejects any request without `Authorization: Bearer <CRON_SECRET>`.
+2. Pages through every non-paused profile and keeps those whose *current local hour*
+   equals their `notification_hour`.
+3. Looks `notification_days_before` days ahead and, via `phaseFor()`, keeps only users
+   for whom that day is the **first day of a new phase**.
+4. Buckets the survivors by phase and lead time, so a single OneSignal call per bucket
+   sends copy with the correct wording, and reports how many pushes actually landed.
+
+Running hourly rather than daily is what lets every user pick their own send hour
+without the server needing a per-user scheduler.
+
+## Running it yourself
+
+### Prerequisites
+
+- **Node.js** 18+
+- A **Supabase** project (free tier is fine)
+- A **OneSignal** app, for web push
+- **Deno**, only if you want to run the phase tests
+
+### 1. Install
 
 ```bash
-git clone https://github.com/yourusername/LoadBuddy.git
+git clone https://github.com/akamaurya/LoadBuddy.git
 cd LoadBuddy/LoadTracker
 npm install
 ```
 
-### 2. Configure environment variables
+### 2. Frontend environment
 
-Create a `.env` file in `LoadTracker/` with the **frontend** keys (these are exposed to the browser via Vite, so only use public keys here):
+Create `LoadTracker/.env`. These are compiled into the browser bundle, so only public
+keys belong here:
 
 ```env
 VITE_SUPABASE_URL=https://your-project.supabase.co
@@ -79,108 +163,76 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 VITE_ONESIGNAL_APP_ID=your_onesignal_app_id
 ```
 
-### 3. Supabase setup
+The app degrades gracefully if Supabase vars are missing and skips push init if the
+OneSignal id is absent, so you can boot the landing page with no configuration at all.
 
-1. Create a project and a `profiles` table with the columns listed above (with row-level security so users can only read/write their own row).
-2. Enable the **Google** auth provider if you want Google sign-in.
-3. Add your local and production URLs to the auth redirect allow-list.
+### 3. Database
 
-### 4. Run locally
-
-```bash
-npm run dev
-```
-
-Open `http://localhost:5173`. To test the iOS "Add to Home Screen" / web push flow, use Safari on an iOS 16.4+ device over your local network.
-
----
-
-## The Notification Edge Function
-
-The serverless logic lives in `supabase/functions/notify/index.ts` (Deno). It is designed to be **invoked once per hour** by a scheduler (e.g. Supabase scheduled functions / pg_cron, or any external cron hitting the function URL with the secret).
-
-Each run it:
-
-1. Rejects any request without `Authorization: Bearer <CRON_SECRET>`.
-2. Loads all profiles and, for each, checks whether the **current local hour** matches that user's `notification_hour`.
-3. Looks `notification_days_before` days into the future and, using the shared `phaseFor()` math, sends a push **only if** that look-ahead day is the first day of a new Load or Deload phase.
-4. Buckets users by phase + lead time so every push states the correct timing, then fires them via the OneSignal API.
-
-### Edge function secrets
-
-Set these as secrets on the Supabase edge function (the service role and REST keys must **never** be exposed to the frontend):
-
-```env
-ONESIGNAL_APP_ID=your_onesignal_app_id
-ONESIGNAL_REST_API_KEY=your_onesignal_rest_api_key
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
-CRON_SECRET=a_long_random_string
-```
-
-### Deploy the function
+The schema, RLS policies, and the `delete_user()` function are committed as migrations:
 
 ```bash
-cd LoadTracker
+supabase link --project-ref <your-project-ref>
+supabase db push
+```
+
+Then enable the **Google** auth provider if you want Google sign-in, and add your local
+and production URLs to the auth redirect allow-list.
+
+### 4. Run
+
+```bash
+npm run dev      # http://localhost:5173
+npm run lint
+npm run build
+```
+
+To exercise the iOS Add-to-Home-Screen and web-push flow you need Safari on a real
+iOS 16.4+ device reaching your machine over the network — desktop Safari won't do.
+
+### 5. Deploy the notifier
+
+```bash
 supabase functions deploy notify
-supabase secrets set ONESIGNAL_APP_ID=... ONESIGNAL_REST_API_KEY=... CRON_SECRET=...
+supabase secrets set \
+  ONESIGNAL_APP_ID=... \
+  ONESIGNAL_REST_API_KEY=... \
+  CRON_SECRET=...
 ```
 
-Then schedule it to run hourly, passing the `Authorization: Bearer <CRON_SECRET>` header.
-
----
-
-## The Logic (Math)
-
-Phases are computed from days since the user's `start_date`, not from ISO week numbers, so any cycle/deload length works:
-
-```ts
-phaseFor(daysSinceStart, cycleWeeks, deloadWeeks)
-// → { isDeload, daysIntoCycle, daysUntilNextPhase, isPhaseStart }
-```
-
-* A cycle is `cycleWeeks * 7` days long.
-* The first `(cycleWeeks - deloadWeeks) * 7` days are **Load**; the rest are **Deload**.
-* `isPhaseStart` is true only on the first day of a load or deload block — that's what the notifier keys off of.
-
-For example, with a 4-week cycle and a 1-week deload: weeks 1–3 are Load, week 4 is Deload, repeating indefinitely from the start date.
-
-The module is pure and zero-dependency, with a built-in self-check you can run directly:
-
-```bash
-deno run supabase/functions/_shared/phase.ts
-```
-
----
-
-## Deployment (Frontend)
-
-The Vite frontend is hosted on Vercel:
-
-1. Install the Vercel CLI: `npm i -g vercel`
-2. Run `vercel` from `LoadTracker/` and link the project.
-3. Add the `VITE_*` environment variables in the Vercel project dashboard.
-4. Deploy: `vercel --prod`
-
----
+`SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are injected by the platform. Then
+schedule the function hourly (pg_cron, Supabase scheduled functions, or any external
+cron), passing `Authorization: Bearer <CRON_SECRET>`.
 
 ## Tests
 
-A Playwright smoke test for the landing page (including the EN/Hinglish toggle) lives in `LoadTracker/tests/`:
+The phase math — the part where a bug is both most likely and least visible — is
+covered by a Deno test suite, including a brute-force check that the current formula
+agrees with the original week-floor implementation across every cycle/deload
+combination from 2 to 8 weeks:
+
+```bash
+cd LoadTracker
+npm test          # deno test supabase/functions/_shared/
+```
+
+A Playwright smoke test covers the landing page and its language toggle. It asserts on
+structure and on the *change* between languages rather than on exact copy, so wording
+edits don't produce false failures:
 
 ```bash
 cd LoadTracker/tests
 python3 -m venv venv && source venv/bin/activate
-pip install playwright && playwright install
-python test_landing.py   # requires the dev server running on :5173
+pip install -r requirements.txt && playwright install chromium
+python test_landing.py    # expects the dev server on :5173
 ```
 
----
+## A note on iOS push
 
-## A Note on iOS Push Notifications
-
-Apple restricts web push to **iOS 16.4+**, and the user **must** add the app to their Home Screen before Safari will allow notification permissions. The UI includes a prompt to guide users through this flow when they view the app in a normal mobile browser.
+Apple only supports web push on **iOS 16.4+**, and only after the user has added the
+site to their Home Screen — Safari will not even show the permission prompt otherwise.
+The in-app prompt walks users through that, which is why an "Add to Home Screen" modal
+exists in what is otherwise a deliberately screen-free app.
 
 ## License
 
-MIT
+[MIT](LICENSE)
