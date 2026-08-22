@@ -131,6 +131,10 @@ export default function HeroAnimation() {
     const root = containerRef.current;
     if (!root) return;
 
+    // Respect the OS "reduce motion" setting: paint one representative frame
+    // and stop, rather than running a rAF loop for the life of the page.
+    const staticOnly = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     const $ = id => root.querySelector('#' + id);
     const sa = (id, k, v) => {
       const e = $(id);
@@ -308,10 +312,14 @@ export default function HeroAnimation() {
         }
       }
 
-      rafId = requestAnimationFrame(frame);
+      if (!staticOnly) rafId = requestAnimationFrame(frame);
     }
 
-    rafId = requestAnimationFrame(frame);
+    if (staticOnly) {
+      frame(0.42 * C); // end of the third load week: bars filled, arms mid-press
+    } else {
+      rafId = requestAnimationFrame(frame);
+    }
 
     return () => {
       cancel = true;
