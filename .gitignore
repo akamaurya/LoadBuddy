@@ -1,0 +1,10 @@
+# macOS
+.DS_Store
+
+# Local agent/editor tooling
+.claude/
+.skills/
+
+# Environment
+.env
+**/.env

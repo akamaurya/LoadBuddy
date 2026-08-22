@@ -13,8 +13,13 @@ theory
 
 node_modules
 dist
+dev-dist
 dist-ssr
 *.local
+
+# Python test env
+tests/venv
+__pycache__/
 
 # Editor directories and files
 .vscode/*
