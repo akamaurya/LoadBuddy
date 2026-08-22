@@ -50,8 +50,20 @@ export function PrivacyPage({ onBack }) {
 
             <h3>Usage Analytics</h3>
             <p>
-              We use Vercel Analytics to collect anonymized usage data such as page views and general 
-              interaction patterns. This data does not personally identify you.
+              We use <strong>Vercel Analytics</strong> to collect anonymized usage data such as page
+              views and general interaction patterns. This data does not personally identify you.
+            </p>
+            <p>
+              We also use <strong>Microsoft Clarity</strong> to understand how the Service is used.
+              Clarity records product-usage sessions — page views, clicks, scrolling, and mouse or
+              touch movement — and combines them into heatmaps and aggregated session replays. It
+              sets its own cookies to recognise returning visitors. We use this only to find usability
+              problems; we never use it to identify you personally, and we do not sell this data. You
+              can read Microsoft's privacy statement at{' '}
+              <a href="https://privacy.microsoft.com/privacystatement" target="_blank" rel="noopener noreferrer">
+                privacy.microsoft.com
+              </a>. Browsers set to block third-party cookies, or with a Do Not Track / tracker-blocking
+              extension enabled, will prevent Clarity from loading.
             </p>
           </section>
 
@@ -73,6 +85,7 @@ export function PrivacyPage({ onBack }) {
               <li><strong>Supabase</strong> — Authentication and database hosting</li>
               <li><strong>OneSignal</strong> — Push notification delivery (only if you enable notifications)</li>
               <li><strong>Vercel</strong> — Hosting and anonymized analytics</li>
+              <li><strong>Microsoft Clarity</strong> — Usage heatmaps and aggregated session replay</li>
             </ul>
             <p>
               Each of these services has their own privacy policy. We encourage you to review them.
@@ -110,8 +123,10 @@ export function PrivacyPage({ onBack }) {
           <section>
             <h2>8. Cookies & Local Storage</h2>
             <p>
-              LoadBuddy uses browser local storage to persist user preferences such as language selection, 
-              pause state, and notification banner dismissal. We do not use third-party tracking cookies.
+              LoadBuddy uses browser local storage to persist user preferences such as language
+              selection and notification banner dismissal, and Supabase sets a cookie to keep you
+              signed in. Microsoft Clarity, described in section 2, sets third-party analytics
+              cookies. We do not use advertising cookies, and we do not sell your data.
             </p>
           </section>
 

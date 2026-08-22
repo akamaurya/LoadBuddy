@@ -11,13 +11,13 @@ export default defineConfig({
       workbox: {
         importScripts: ['/OneSignalSDKWorker.js'],
       },
-      includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'apple-touch-icon-120x120.png', 'apple-touch-icon-152x152.png', 'apple-touch-icon-167x167.png', 'mask-icon.svg'],
+      includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'apple-touch-icon-120x120.png', 'apple-touch-icon-152x152.png', 'apple-touch-icon-167x167.png'],
       manifest: {
         name: 'LoadBuddy',
         short_name: 'LoadBuddy',
-        description: 'Track your 4-week load/deload training cycle',
-        theme_color: '#2ECC71',
-        background_color: '#2ECC71',
+        description: 'Know whether today is a load or a deload day, on your own training cycle.',
+        theme_color: '#00D066',
+        background_color: '#00D066',
         display: 'standalone',
         icons: [
           {

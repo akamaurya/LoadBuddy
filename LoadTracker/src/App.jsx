@@ -16,7 +16,7 @@ const Settings = lazy(() => import('./components/Settings').then(m => ({ default
 const OnboardingWizard = lazy(() => import('./components/OnboardingWizard').then(m => ({ default: m.OnboardingWizard })));
 const ResetPassword = lazy(() => import('./components/ResetPassword').then(m => ({ default: m.ResetPassword })));
 
-const ONESIGNAL_APP_ID = import.meta.env.VITE_ONESIGNAL_APP_ID || "YOUR_ONESIGNAL_APP_ID";
+const ONESIGNAL_APP_ID = import.meta.env.VITE_ONESIGNAL_APP_ID;
 let isOneSignalInitialized = false;
 
 const authContainerStyle = { padding: '2rem', maxWidth: '400px', margin: '0 auto', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' };
@@ -30,9 +30,8 @@ function App() {
   const [authView, setAuthView] = useState('landing'); // 'landing' or 'login'
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
 
-  const [isPaused, setIsPaused] = useState(false);
   const [notifBannerDismissed, setNotifBannerDismissed] = useState(
-    () => localStorage.getItem('loadtracker_notif_dismissed') === 'true'
+    () => localStorage.getItem('loadbuddy_notif_dismissed') === 'true'
   );
   const [isSubscribed, setIsSubscribed] = useState(true);
 
@@ -88,18 +87,9 @@ function App() {
   const localUserId = session?.user?.id;
 
   useEffect(() => {
-    // 1. PWA Check is now handled by PWAPrompt component
-
-    // 2. Load cached pause state
-    const savedPauseState = localStorage.getItem('loadtracker_paused');
-    if (savedPauseState === 'true') {
-      setIsPaused(true);
-    }
-
-    // 3. Initialize OneSignal
     const initOneSignal = async () => {
-      if (ONESIGNAL_APP_ID === "YOUR_ONESIGNAL_APP_ID") {
-        console.warn("OneSignal App ID is missing. Skipping initialization.");
+      if (!ONESIGNAL_APP_ID) {
+        console.warn("VITE_ONESIGNAL_APP_ID is not set. Skipping push initialization.");
         return;
       }
       if (isOneSignalInitialized || !localUserId) return;
@@ -118,38 +108,35 @@ function App() {
         // Use Supabase User ID for OneSignal external id
         await OneSignal.login(localUserId);
 
-        // Apply initial tags based on paused state
-        const pausedStr = savedPauseState === 'true' ? 'true' : 'false';
-        OneSignal.User.addTag("paused", pausedStr);
-
-        // Check current subscription status
-        const optIn = OneSignal.User.PushSubscription.optedIn;
-        setIsSubscribed(!!optIn);
-
-        // Listen for changes
+        setIsSubscribed(!!OneSignal.User.PushSubscription.optedIn);
         OneSignal.User.PushSubscription.addEventListener("change", (e) => {
           setIsSubscribed(e.current.optedIn);
         });
 
       } catch (error) {
         console.error("OneSignal Init Error:", error);
+        isOneSignalInitialized = false; // allow a retry on the next mount
       }
     };
 
     initOneSignal();
   }, [localUserId]);
 
-  const togglePause = () => {
-    const newState = !isPaused;
-    setIsPaused(newState);
-    localStorage.setItem('loadtracker_paused', newState.toString());
+  const isPaused = !!profile?.paused;
 
-    try {
-      if (window.OneSignal) {
-        OneSignal.User.addTag("paused", newState.toString());
-      }
-    } catch (e) {
-      console.error("Failed to update OneSignal tag", e);
+  // Pause lives on the profile row, not a OneSignal tag: the notify function
+  // targets users by external_id alias, which ignores tag/segment filters.
+  const togglePause = async () => {
+    if (!profile) return;
+    const next = !isPaused;
+    setProfile({ ...profile, paused: next }); // optimistic
+    const { error } = await supabase
+      .from('profiles')
+      .update({ paused: next })
+      .eq('id', profile.id);
+    if (error) {
+      console.error("Failed to update pause state", error);
+      setProfile({ ...profile, paused: !next });
     }
   };
 
@@ -166,12 +153,10 @@ function App() {
     }
   };
 
-
-
   if (isInitializing) {
     return (
       <div className="auth-container" style={authContainerStyle}>
-        <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>LoadTracker</h1>
+        <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>LoadBuddy</h1>
         <p style={{ textAlign: 'center' }}>Loading...</p>
       </div>
     );
@@ -180,7 +165,7 @@ function App() {
   if (isPasswordRecovery) {
     return (
       <div className="auth-container" style={authContainerStyle}>
-        <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>LoadTracker</h1>
+        <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>LoadBuddy</h1>
         <Suspense fallback={<p style={{ textAlign: 'center' }}>Loading...</p>}>
           <ResetPassword onComplete={() => setIsPasswordRecovery(false)} />
         </Suspense>
@@ -223,7 +208,7 @@ function App() {
 
     return (
       <div className="auth-container" style={authContainerStyle}>
-        <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>LoadTracker</h1>
+        <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>LoadBuddy</h1>
         {supabase ? (
           <div>
             <button
@@ -246,7 +231,6 @@ function App() {
     );
   }
 
-  // Block 1: Is the profile loading?
   if (isLoadingProfile) {
     return <div className="loading" style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading profile...</div>;
   }
@@ -274,7 +258,7 @@ function App() {
     }
   }
 
-  // Block 2: Are they a first time user? (Settings / Questionnaire)
+  // First run shows the onboarding wizard; a returning user gets the Settings screen.
   if (showSettings) {
     if (!profile) {
       // First Time User
@@ -310,9 +294,7 @@ function App() {
     }
   }
 
-
-
-  // Block 4: Main Application View (Load/Deload)
+  // Main application view: the whole screen is the Load/Deload indicator.
 
   return (
     <div className={`app-container ${isDeload ? 'deload' : 'load'} auth-app-view`}>
@@ -343,7 +325,7 @@ function App() {
             <button className="notification-banner-btn" onClick={handleEnablePush}>Enable Notifications</button>
             <button className="notification-banner-dismiss" onClick={() => {
               setNotifBannerDismissed(true);
-              localStorage.setItem('loadtracker_notif_dismissed', 'true');
+              localStorage.setItem('loadbuddy_notif_dismissed', 'true');
             }}>Not now</button>
           </div>
         </div>
@@ -361,7 +343,6 @@ function App() {
         </button>
       </div>
 
-      {/* Removed old ios-prompt */}
       <Analytics />
     </div>
   );

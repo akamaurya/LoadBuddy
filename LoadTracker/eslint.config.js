@@ -5,7 +5,8 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  // `tests/` holds a Python venv whose site-packages ship bundled JS.
+  globalIgnores(['dist', 'dev-dist', 'tests']),
   {
     files: ['**/*.{js,jsx}'],
     extends: [

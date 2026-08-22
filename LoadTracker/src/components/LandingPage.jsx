@@ -3,6 +3,35 @@ import './LandingPage.css';
 import HeroAnimation from './HeroAnimation';
 
 
+// Shared across both languages so a screenshot can never drift away from the
+// copy it illustrates — only the wording is translated below.
+const FEATURE_IMAGES = {
+  states: {
+    image: "/Frame 30.png",
+    width: 632,
+    height: 259,
+    alt: "The two app states side by side: a green LOAD screen and an orange DELOAD screen",
+  },
+  cycle: {
+    image: "/Frame 27.png",
+    width: 617,
+    height: 261,
+    alt: "Settings screen showing training block start date, cycle length and deload length",
+  },
+  pause: {
+    image: "/Frame 43.png",
+    width: 628,
+    height: 251,
+    alt: "The Pause Tasks button",
+  },
+  notifications: {
+    image: "/Frame 27 (1).png",
+    width: 789,
+    height: 235,
+    alt: "Notification preferences: notification hour and days before a cycle change",
+  },
+};
+
 const content = {
   en: {
     navbar: {
@@ -22,34 +51,22 @@ const content = {
     },
     features: [
       {
-        image: "/Frame 27.png",
-        width: 617,
-        height: 261,
-        alt: "Binary Focus: Load or Deload",
+        ...FEATURE_IMAGES.states,
         title: "Binary Focus. Zero Bloat.",
         desc: <>One screen. Two states. <span className="highlight-green">Green</span> = push harder. <span className="highlight-orange">Orange</span> = recover. That's it.</>
       },
       {
-        image: "/Frame 27 (1).png",
-        width: 789,
-        height: 235,
-        alt: "Customize Cycle Length",
+        ...FEATURE_IMAGES.cycle,
         title: "Your Body. Your Cycles.",
         desc: "Set your own Load and Deload lengths to match how your body actually recovers."
       },
       {
-        image: "/Frame 43.png",
-        width: 628,
-        height: 251,
-        alt: "Pause Tasks Button",
+        ...FEATURE_IMAGES.pause,
         title: "Pause Anytime.",
         desc: "Vacation? Injury? Pause your cycle with one tap and resume right where you left off."
       },
       {
-        image: "/Frame 30.png",
-        width: 632,
-        height: 259,
-        alt: "Notification Preferences",
+        ...FEATURE_IMAGES.notifications,
         title: "Automated Autoregulation.",
         desc: "Get notified before your cycle switches so you're always prepared — mentally and physically."
       }
@@ -103,34 +120,22 @@ const content = {
     },
     features: [
       {
-        image: "/Frame 27.png",
-        width: 617,
-        height: 261,
-        alt: "Binary Focus: Load or Deload",
+        ...FEATURE_IMAGES.states,
         title: "Do cheezein. Koi bakwaas nahi.",
         desc: <>Na spreadsheets, na complex logs. Poora screen teri biological signal hai. <span className="highlight-green">Green</span> = progressive overload. <span className="highlight-orange">Orange</span> = chill mode. That's it.</>
       },
       {
-        image: "/Frame 27 (1).png",
-        width: 789,
-        height: 235,
-        alt: "Customize Cycle Length",
+        ...FEATURE_IMAGES.cycle,
         title: "Tera body. Tera cycle. Teri marzi.",
         desc: "Har kisi pe 4-week cycle fit nahi hota — obvious hai. Load aur Deload customize karo apne hisaab se. No cap."
       },
       {
-        image: "/Frame 43.png",
-        width: 628,
-        height: 251,
-        alt: "Pause Tasks Button",
+        ...FEATURE_IMAGES.pause,
         title: "Ruk ja jab man kare.",
         desc: "Goa trip plan hai? Injury ho gayi? Ek tap mein pause karo. Waapas aao toh wahin se shuru — koi drama nahi."
       },
       {
-        image: "/Frame 30.png",
-        width: 632,
-        height: 259,
-        alt: "Notification Preferences",
+        ...FEATURE_IMAGES.notifications,
         title: "Automatic Autoregulation. Zero bhool.",
         desc: "Koi transition miss mat karo yaar. Advance notifications set karo — Load se Deload shift ke liye mentally aur physically ready rehna padega. App remind karega."
       }
@@ -235,7 +240,7 @@ export function LandingPage({ onSignIn, onSignUp, onTerms, onPrivacy }) {
           </p>
           <div className="hero-actions">
             <button className="hero-btn get-started-btn" onClick={onSignUp}>{t.hero.getStarted}</button>
-            <button className="hero-btn view-science-btn" onClick={() => document.getElementById('science-section').scrollIntoView({behavior: 'smooth'})}>{t.hero.science}</button>
+            <button className="hero-btn view-science-btn" onClick={() => document.getElementById('science-section')?.scrollIntoView({ behavior: 'smooth' })}>{t.hero.science}</button>
           </div>
 
           {/* Phones Graphic */}

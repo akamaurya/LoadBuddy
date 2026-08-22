@@ -1,20 +1,13 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { TIMEZONE_OPTIONS, detectTimezone } from '../lib/timezones';
+import { timezoneOptionsFor } from '../lib/timezones';
+import { LIMITS, formatDisplayDate, initialFormData, maxDeloadWeeks, toProfileRow } from '../lib/cycle';
 
 export function Settings({ session, profile, onProfileUpdated, onCancel, isDeload }) {
     const [loading, setLoading] = useState(false);
     const [formError, setFormError] = useState(null);
-    const [formData, setFormData] = useState({
-        start_date: profile?.start_date || new Date().toISOString().split('T')[0],
-        cycle_length_weeks: profile?.cycle_length_weeks || 4,
-        deload_length_weeks: profile?.deload_length_weeks || 1,
-        timezone: profile?.timezone && TIMEZONE_OPTIONS.some(tz => tz.value === profile.timezone)
-            ? profile.timezone
-            : detectTimezone(),
-        notification_hour: profile?.notification_hour ?? 20,
-        notification_days_before: profile?.notification_days_before ?? 1,
-    });
+    const [formData, setFormData] = useState(() => initialFormData(profile));
+    const dateInputRef = useRef(null);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -34,21 +27,14 @@ export function Settings({ session, profile, onProfileUpdated, onCancel, isDeloa
         setFormError(null);
 
         try {
-            const updates = {
-                id: session.user.id,
-                email: session.user.email,
-                start_date: formData.start_date,
-                cycle_length_weeks: parseInt(formData.cycle_length_weeks, 10),
-                deload_length_weeks: parseInt(formData.deload_length_weeks, 10),
-                timezone: formData.timezone,
-                notification_hour: parseInt(formData.notification_hour, 10),
-                notification_days_before: parseInt(formData.notification_days_before, 10),
-            };
-
-            const { error } = await supabase.from('profiles').upsert(updates);
+            const { data, error } = await supabase
+                .from('profiles')
+                .upsert(toProfileRow(session, formData))
+                .select()
+                .single();
             if (error) throw error;
 
-            onProfileUpdated(updates);
+            onProfileUpdated(data);
         } catch (error) {
             setFormError(error.message);
         } finally {
@@ -76,28 +62,8 @@ export function Settings({ session, profile, onProfileUpdated, onCancel, isDeloa
         }
     };
 
-    // Ordinal suffix helper
-    const getOrdinal = (n) => {
-        const s = ['th', 'st', 'nd', 'rd'];
-        const v = n % 100;
-        return n + (s[(v - 20) % 10] || s[v] || s[0]);
-    };
-
-    // Format the date for display as "1st Jan 2026"
-    const formatDisplayDate = (dateStr) => {
-        if (!dateStr) return '';
-        try {
-            const d = new Date(dateStr + 'T00:00:00');
-            const day = getOrdinal(d.getDate());
-            const month = d.toLocaleDateString('en-US', { month: 'short' });
-            const year = d.getFullYear();
-            return `${day} ${month} ${year}`;
-        } catch {
-            return dateStr;
-        }
-    };
-
     const themeClass = isDeload ? 'settings-deload' : 'settings-load';
+    const timezoneOptions = timezoneOptionsFor(formData.timezone);
 
     return (
         <div className={`settings-container ${themeClass}`}>
@@ -118,12 +84,12 @@ export function Settings({ session, profile, onProfileUpdated, onCancel, isDeloa
                         {/* Training Block Start Date */}
                         <div className="settings-field-row">
                             <span className="settings-field-label">Training Block Start Date:</span>
-                            <div className="settings-field-value" style={{ position: 'relative', cursor: 'pointer' }} onClick={() => document.getElementById('settings-date-input').showPicker?.()}>
+                            <div className="settings-field-value" style={{ position: 'relative', cursor: 'pointer' }} onClick={() => dateInputRef.current?.showPicker?.()}>
                                 <span style={{ color: '#fff', fontFamily: "'Helvetica Neue', Arial, sans-serif", fontWeight: 500, fontSize: 'clamp(0.875rem, 4vw, 1.5rem)' }}>
                                     {formatDisplayDate(formData.start_date)}
                                 </span>
                                 <input
-                                    id="settings-date-input"
+                                    ref={dateInputRef}
                                     type="date"
                                     name="start_date"
                                     value={formData.start_date}
@@ -141,7 +107,8 @@ export function Settings({ session, profile, onProfileUpdated, onCancel, isDeloa
                                 <input
                                     type="number"
                                     name="cycle_length_weeks"
-                                    min="1"
+                                    min={LIMITS.cycle_length_weeks.min}
+                                    max={LIMITS.cycle_length_weeks.max}
                                     value={formData.cycle_length_weeks}
                                     onChange={handleChange}
                                     required
@@ -157,7 +124,7 @@ export function Settings({ session, profile, onProfileUpdated, onCancel, isDeloa
                                     type="number"
                                     name="deload_length_weeks"
                                     min="1"
-                                    max={formData.cycle_length_weeks}
+                                    max={maxDeloadWeeks(formData.cycle_length_weeks)}
                                     value={formData.deload_length_weeks}
                                     onChange={handleChange}
                                     required
@@ -169,7 +136,7 @@ export function Settings({ session, profile, onProfileUpdated, onCancel, isDeloa
                         <div className="settings-tz-section">
                             <span className="settings-tz-label">Timezone:</span>
                             <div className="settings-tz-list">
-                                {TIMEZONE_OPTIONS.map((tz) => (
+                                {timezoneOptions.map((tz) => (
                                     <label
                                         key={tz.value}
                                         className={`settings-tz-item ${formData.timezone === tz.value ? 'selected' : ''}`}
@@ -200,8 +167,8 @@ export function Settings({ session, profile, onProfileUpdated, onCancel, isDeloa
                                 <input
                                     type="number"
                                     name="notification_hour"
-                                    min="0"
-                                    max="23"
+                                    min={LIMITS.notification_hour.min}
+                                    max={LIMITS.notification_hour.max}
                                     value={formData.notification_hour}
                                     onChange={handleChange}
                                     required
@@ -216,8 +183,8 @@ export function Settings({ session, profile, onProfileUpdated, onCancel, isDeloa
                                 <input
                                     type="number"
                                     name="notification_days_before"
-                                    min="1"
-                                    max="30"
+                                    min={LIMITS.notification_days_before.min}
+                                    max={LIMITS.notification_days_before.max}
                                     value={formData.notification_days_before}
                                     onChange={handleChange}
                                     required

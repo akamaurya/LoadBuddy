@@ -1,20 +1,18 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { format } from 'date-fns';
-import { detectTimezone } from '../lib/timezones';
+import { LIMITS, formatDisplayDate, initialFormData, maxDeloadWeeks, toProfileRow } from '../lib/cycle';
 import './OnboardingWizard.css';
+
+const TOTAL_INPUT_STEPS = 3; // steps 1-3 collect input; step 4 is the confirmation screen
 
 export function OnboardingWizard({ session, onComplete }) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    start_date: new Date().toISOString().split('T')[0],
-    cycle_length_weeks: 4,
-    deload_length_weeks: 1,
-    timezone: detectTimezone(),
-    notification_hour: 8,
-    notification_days_before: 4,
-  });
+  const [saveError, setSaveError] = useState(null);
+  const [formData, setFormData] = useState(() => initialFormData(null));
+  const doneTimer = useRef(null);
+
+  useEffect(() => () => clearTimeout(doneTimer.current), []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -26,67 +24,35 @@ export function OnboardingWizard({ session, onComplete }) {
 
   const handleSaveAndStart = async () => {
     setLoading(true);
-    try {
-      const updates = {
-        id: session.user.id,
-        email: session.user.email,
-        start_date: formData.start_date,
-        cycle_length_weeks: parseInt(formData.cycle_length_weeks, 10),
-        deload_length_weeks: parseInt(formData.deload_length_weeks, 10),
-        timezone: formData.timezone,
-        notification_hour: parseInt(formData.notification_hour, 10),
-        notification_days_before: parseInt(formData.notification_days_before, 10),
-      };
+    setSaveError(null);
+    const row = toProfileRow(session, formData);
 
-      // Retry logic for transient network errors (iOS Safari "Load failed")
-      const MAX_RETRIES = 2;
-      let lastError = null;
-      for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-        try {
-          const { error } = await supabase.from('profiles').upsert(updates);
-          if (error) throw error;
-          lastError = null;
-          break;
-        } catch (err) {
-          lastError = err;
-          if (attempt < MAX_RETRIES) {
-            // Short delay before retry (300ms, then 800ms)
-            await new Promise(r => setTimeout(r, attempt === 0 ? 300 : 800));
-          }
-        }
+    // Retry transient network errors — iOS Safari drops the first request
+    // ("Load failed") often enough to strand users on the final step.
+    const MAX_RETRIES = 2;
+    let lastError = null;
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      const { data, error } = await supabase.from('profiles').upsert(row).select().single();
+      if (!error) {
+        setStep(4);
+        doneTimer.current = setTimeout(() => onComplete(data), 3500);
+        return;
       }
-      if (lastError) throw lastError;
-
-      // Move to success step
-      setStep(4);
-      
-      // Auto-continue after short delay down to main flow
-      setTimeout(() => {
-        onComplete(updates);
-      }, 3500);
-
-    } catch (error) {
-      console.error("Profile save failed after retries:", error);
-      alert("Couldn't save — please check your connection and try again.");
-      setLoading(false);
+      lastError = error;
+      if (attempt < MAX_RETRIES) {
+        await new Promise(r => setTimeout(r, attempt === 0 ? 300 : 800));
+      }
     }
+
+    console.error('Profile save failed after retries:', lastError);
+    setSaveError("Couldn't save — check your connection and try again.");
+    setLoading(false);
   };
 
-  const handleNext = () => setStep(s => Math.min(s + 1, 4));
+  const handleNext = () => setStep(s => Math.min(s + 1, TOTAL_INPUT_STEPS));
   const handleBack = () => setStep(s => Math.max(s - 1, 1));
 
-  const formatDisplayDate = (dateStr) => {
-    if (!dateStr) return '';
-    try {
-      const [year, month, day] = dateStr.split('-');
-      const d = new Date(parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10));
-      return format(d, 'MMM d, yyyy');
-    } catch {
-      return dateStr;
-    }
-  };
-
-  const pdots = [1, 2, 3, 4];
+  const pdots = [1, 2, 3];
 
   return (
     <div className="onboarding-wrap auth-app-view">
@@ -105,7 +71,7 @@ export function OnboardingWizard({ session, onComplete }) {
         {/* STEP 1 */}
         {step === 1 && (
           <div className="onboarding-step active">
-            <div className="onboarding-step-title">Step 1 of 3</div>
+            <div className="onboarding-step-title">Step 1 of {TOTAL_INPUT_STEPS}</div>
             <div className="onboarding-step-head">Training block</div>
             
             <div className="onboarding-field">
@@ -124,8 +90,8 @@ export function OnboardingWizard({ session, onComplete }) {
                 <input 
                   type="number" 
                   name="cycle_length_weeks"
-                  value={formData.cycle_length_weeks} 
-                  min="1" max="52"
+                  value={formData.cycle_length_weeks}
+                  min={LIMITS.cycle_length_weeks.min} max={LIMITS.cycle_length_weeks.max}
                   onChange={handleChange}
                 />
                 <div className="onboarding-hint">weeks</div>
@@ -136,7 +102,7 @@ export function OnboardingWizard({ session, onComplete }) {
                   type="number" 
                   name="deload_length_weeks"
                   value={formData.deload_length_weeks}
-                  min="1" max={formData.cycle_length_weeks}
+                  min="1" max={maxDeloadWeeks(formData.cycle_length_weeks)}
                   onChange={handleChange}
                 />
                 <div className="onboarding-hint">weeks</div>
@@ -152,7 +118,7 @@ export function OnboardingWizard({ session, onComplete }) {
         {/* STEP 2 */}
         {step === 2 && (
           <div className="onboarding-step active">
-            <div className="onboarding-step-title">Step 2 of 3</div>
+            <div className="onboarding-step-title">Step 2 of {TOTAL_INPUT_STEPS}</div>
             <div className="onboarding-step-head">Notifications</div>
             
             <div className="onboarding-field">
@@ -172,7 +138,7 @@ export function OnboardingWizard({ session, onComplete }) {
                   type="number" 
                   name="notification_hour"
                   value={formData.notification_hour}
-                  min="0" max="23"
+                  min={LIMITS.notification_hour.min} max={LIMITS.notification_hour.max}
                   onChange={handleChange}
                 />
                 <div className="onboarding-hint">0–23 (8 = 8am)</div>
@@ -183,7 +149,7 @@ export function OnboardingWizard({ session, onComplete }) {
                   type="number" 
                   name="notification_days_before"
                   value={formData.notification_days_before}
-                  min="1" max="14"
+                  min={LIMITS.notification_days_before.min} max={LIMITS.notification_days_before.max}
                   onChange={handleChange}
                 />
                 <div className="onboarding-hint">cycle change</div>
@@ -200,7 +166,7 @@ export function OnboardingWizard({ session, onComplete }) {
         {/* STEP 3 */}
         {step === 3 && (
           <div className="onboarding-step active">
-            <div className="onboarding-step-title">Step 3 of 3</div>
+            <div className="onboarding-step-title">Step 3 of {TOTAL_INPUT_STEPS}</div>
             <div className="onboarding-step-head">Confirm setup</div>
             
             <div className="onboarding-summary-rows">
@@ -230,6 +196,8 @@ export function OnboardingWizard({ session, onComplete }) {
               </div>
             </div>
             
+            {saveError && <div className="onboarding-error">{saveError}</div>}
+
             <div className="onboarding-btn-row">
               <button className="onboarding-btn btn-back" onClick={handleBack} disabled={loading}>Back</button>
               <button className="onboarding-btn btn-next" onClick={handleSaveAndStart} disabled={loading}>
