@@ -20,11 +20,35 @@ export const TIMEZONE_OPTIONS = [
     { label: 'New Zealand', value: 'Pacific/Auckland', offset: 'UTC + 12 / UTC + 13' },
 ];
 
+const FALLBACK_TIMEZONE = 'America/New_York';
+
+// Human-readable UTC offset for an arbitrary IANA zone, e.g. "UTC + 2".
+function offsetLabel(timeZone) {
+    try {
+        const parts = new Intl.DateTimeFormat('en-US', { timeZone, timeZoneName: 'shortOffset' })
+            .formatToParts(new Date());
+        const name = parts.find(p => p.type === 'timeZoneName')?.value ?? '';
+        return name.replace('GMT', 'UTC ').replace(/([+-])/, '$1 ').replace(/\s+/g, ' ').trim() || 'UTC + 0';
+    } catch {
+        return '';
+    }
+}
+
+// Returns the user's real IANA zone. The curated list above covers the common
+// cases for the picker, but we deliberately do NOT snap unlisted zones onto a
+// listed one — the zone drives phase math and the notification hour, so a
+// Europe/Paris user silently becoming America/New_York would fire reminders
+// six hours off. Unlisted zones are surfaced by timezoneOptionsFor() instead.
 export function detectTimezone() {
     const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    // Map common aliases
-    if (detected === 'Asia/Calcutta') return 'Asia/Kolkata';
-    // Check if it matches one of our options
-    const match = TIMEZONE_OPTIONS.find(tz => tz.value === detected);
-    return match ? detected : 'America/New_York'; // fallback
+    if (!detected) return FALLBACK_TIMEZONE;
+    if (detected === 'Asia/Calcutta') return 'Asia/Kolkata'; // legacy alias
+    return detected;
+}
+
+// The picker options, with `value` appended when it isn't one of the curated
+// zones, so a selected timezone is always visible and selectable.
+export function timezoneOptionsFor(value) {
+    if (!value || TIMEZONE_OPTIONS.some(tz => tz.value === value)) return TIMEZONE_OPTIONS;
+    return [...TIMEZONE_OPTIONS, { label: value.replace(/_/g, ' '), value, offset: offsetLabel(value) }];
 }
